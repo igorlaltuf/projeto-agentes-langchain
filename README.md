@@ -20,6 +20,7 @@ O plano detalhado, fase a fase e rubrica a rubrica, está em [`docs/PLANO_DE_IMP
 
 ```
 projeto-agentes-langchain/
+├── devbox.json / pyproject.toml / uv.lock   # ambiente reprodutível
 ├── app.py                        # interface Streamlit (chat + painel de verificação)
 ├── src/
 │   ├── config.py                 # modelos, caminhos, modo offline
@@ -41,16 +42,21 @@ projeto-agentes-langchain/
 
 ## Como rodar
 
+O ambiente é gerenciado por [devbox](https://www.jetify.com/devbox) (fixa Python 3.12 e `uv` via Nix) e por [uv](https://docs.astral.sh/uv/) (ambiente virtual e lockfile). Com o devbox instalado:
+
 ```bash
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
+devbox shell                    # instala Python 3.12 + uv e roda `uv sync` (cria .venv a partir do uv.lock)
 cp .env.example .env            # preencha OPENAI_API_KEY e, opcionalmente, LANGCHAIN_API_KEY
 
-python scripts/download_data.py # baixa o CSV da CEAP e monta o SQLite
-python -m src.data --build-index  # monta o índice FAISS do Ato da Mesa
-
-streamlit run app.py
+devbox run data                 # baixa o CSV da CEAP e monta o SQLite
+devbox run index                # monta o índice FAISS do Ato da Mesa (precisa de data/ato_mesa.txt)
+devbox run fixtures             # grava respostas reais das APIs para o modo offline
+devbox run app                  # abre o Streamlit
+devbox run notebook             # abre o Jupyter Lab em notebooks/
+devbox run lint                 # ruff
 ```
+
+Sem devbox, basta ter Python 3.12 e `uv`: `uv sync && uv run streamlit run app.py`. As dependências e versões exatas estão em `pyproject.toml` e `uv.lock`.
 
 ### Modo offline (avaliação sem chaves de API externas)
 

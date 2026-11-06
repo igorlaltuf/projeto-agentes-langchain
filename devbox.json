@@ -1,0 +1,28 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.18.4/.schema/devbox.schema.json",
+  "packages": [
+    "python@3.12",
+    "uv@latest"
+  ],
+  "env": {
+    "UV_PYTHON": "$DEVBOX_PACKAGES_DIR/bin/python3",
+    "UV_PROJECT_ENVIRONMENT": "$PWD/.venv",
+    "PYTHONPATH": "$PWD"
+  },
+  "shell": {
+    "init_hook": [
+      "uv sync --quiet",
+      "source .venv/bin/activate"
+    ],
+    "scripts": {
+      "sync": "uv sync",
+      "app": "uv run streamlit run app.py",
+      "data": "uv run python scripts/download_data.py",
+      "index": "uv run python -m src.data --build-index",
+      "fixtures": "uv run python scripts/record_fixtures.py",
+      "notebook": "uv run jupyter lab notebooks/",
+      "lint": "uv run ruff check . && uv run ruff format --check .",
+      "check": "uv run python -c 'import src.agent, src.data, src.verification; print(\"imports ok\")'"
+    }
+  }
+}

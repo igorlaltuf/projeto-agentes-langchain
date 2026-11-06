@@ -1,4 +1,5 @@
 """Prompts do agente: PTCF (Persona, Task, Context, Format), few-shot e templates."""
+
 from __future__ import annotations
 
 from langchain_core.prompts import ChatPromptTemplate, FewShotChatMessagePromptTemplate, PromptTemplate
@@ -13,13 +14,17 @@ PROMPT_NORMALIZAR_NOME = PromptTemplate.from_template(
     "Texto: {texto}\nResponda apenas em JSON com as chaves nome, partido, uf."
 )
 
-PROMPT_PEDIDO_APURACAO = ChatPromptTemplate.from_messages([
-    ("system",
-     "Voce e um analista de dados de uma redacao especializada na cota parlamentar (CEAP). "
-     "Transforme a pergunta do reporter em um pedido estruturado. "
-     "Se faltar deputado ou periodo para uma consulta de gasto, preencha dado_faltante."),
-    ("human", "{pergunta}"),
-])
+PROMPT_PEDIDO_APURACAO = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            "Voce e um analista de dados de uma redacao especializada na cota parlamentar (CEAP). "
+            "Transforme a pergunta do reporter em um pedido estruturado. "
+            "Se faltar deputado ou periodo para uma consulta de gasto, preencha dado_faltante.",
+        ),
+        ("human", "{pergunta}"),
+    ]
+)
 
 # ----------------------------------------------------------------------------- #
 # Fase 2: system prompt PTCF do agente
@@ -59,24 +64,26 @@ EXEMPLOS_FEW_SHOT = [
     {
         "pergunta": "Quanto o deputado Fulano gastou com combustivel em 2025?",
         "plano": "1) buscar_deputado('Fulano') 2) listar_despesas(id, 2025, categoria='COMBUSTÍVEIS') "
-                 "3) calcular_estatisticas(valores, 'soma') 4) responder com total, periodo e fonte.",
+        "3) calcular_estatisticas(valores, 'soma') 4) responder com total, periodo e fonte.",
     },
     {
         "pergunta": "Compare esse gasto com a media do partido dele.",
         "plano": "1) usar partido ja conhecido no contexto 2) consultar_ceap(SELECT AVG por deputado do partido "
-                 "na categoria e ano) 3) calcular_estatisticas([media, gasto], 'variacao_pct') 4) responder.",
+        "na categoria e ano) 3) calcular_estatisticas([media, gasto], 'variacao_pct') 4) responder.",
     },
     {
         "pergunta": "Gastos do Silva em 2025.",
         "plano": "1) buscar_deputado('Silva') retorna varios homonimos 2) NAO consultar despesas; "
-                 "perguntar ao usuario qual Silva (nome completo ou UF).",
+        "perguntar ao usuario qual Silva (nome completo ou UF).",
     },
 ]
 
-_exemplo_prompt = ChatPromptTemplate.from_messages([
-    ("human", "{pergunta}"),
-    ("ai", "Plano: {plano}"),
-])
+_exemplo_prompt = ChatPromptTemplate.from_messages(
+    [
+        ("human", "{pergunta}"),
+        ("ai", "Plano: {plano}"),
+    ]
+)
 
 FEW_SHOT_PLANOS = FewShotChatMessagePromptTemplate(
     example_prompt=_exemplo_prompt,
@@ -86,11 +93,15 @@ FEW_SHOT_PLANOS = FewShotChatMessagePromptTemplate(
 # ----------------------------------------------------------------------------- #
 # Fase 2: roteamento
 # ----------------------------------------------------------------------------- #
-PROMPT_ROTEADOR = ChatPromptTemplate.from_messages([
-    ("system",
-     "Classifique a pergunta em exatamente uma categoria: "
-     "'api' (gasto de um deputado especifico), 'sql' (media, ranking, comparacao entre varios), "
-     "'regra' (o que a cota pode pagar, limites, prazos) ou 'conversa' (saudacao, fora do escopo). "
-     "Responda apenas com a categoria."),
-    ("human", "{pergunta}"),
-])
+PROMPT_ROTEADOR = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            "Classifique a pergunta em exatamente uma categoria: "
+            "'api' (gasto de um deputado especifico), 'sql' (media, ranking, comparacao entre varios), "
+            "'regra' (o que a cota pode pagar, limites, prazos) ou 'conversa' (saudacao, fora do escopo). "
+            "Responda apenas com a categoria.",
+        ),
+        ("human", "{pergunta}"),
+    ]
+)

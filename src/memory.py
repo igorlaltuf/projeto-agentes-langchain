@@ -6,6 +6,7 @@
 - LTM episódica ............. apurações anteriores com data, neste módulo
 - LTM procedural ............ system prompt PTCF e docstrings das ferramentas (prompts.py / tools.py)
 """
+
 from __future__ import annotations
 
 from langchain_core.documents import Document
@@ -17,6 +18,7 @@ from langgraph.checkpoint.memory import MemorySaver
 from pydantic import BaseModel, Field
 
 from src import config
+
 
 # ----------------------------------------------------------------------------- #
 # Curto prazo
@@ -41,11 +43,21 @@ def podar_historico(mensagens, llm, max_tokens: int = 3000):
 # ----------------------------------------------------------------------------- #
 # Longo prazo episódico: apurações anteriores
 # ----------------------------------------------------------------------------- #
-_ltm_episodica = InMemoryVectorStore(embedding=OpenAIEmbeddings(model=config.MODELO_EMBEDDINGS))
+_ltm_episodica: InMemoryVectorStore | None = None
+
+
+def _store() -> InMemoryVectorStore:
+    """Cria o vector store episódico sob demanda (evita exigir a chave da OpenAI no import)."""
+    global _ltm_episodica
+    if _ltm_episodica is None:
+        _ltm_episodica = InMemoryVectorStore(embedding=OpenAIEmbeddings(model=config.MODELO_EMBEDDINGS))
+    return _ltm_episodica
 
 
 class GravarApuracaoArgs(BaseModel):
-    resumo: str = Field(..., description="Resumo factual do que foi apurado (deputado, periodo, valores, achados).")
+    resumo: str = Field(
+        ..., description="Resumo factual do que foi apurado (deputado, periodo, valores, achados)."
+    )
     reporter_id: str = Field(..., description="Identificador do reporter.")
 
 
@@ -53,8 +65,9 @@ class GravarApuracaoArgs(BaseModel):
 def gravar_apuracao(resumo: str, reporter_id: str) -> str:
     """Salva o resumo de uma apuracao na memoria de longo prazo do reporter, com a data.
     Use quando o usuario pedir para guardar, resumir ou fechar uma apuracao."""
-    _ltm_episodica.add_documents([Document(page_content=resumo,
-                                           metadata={"reporter": reporter_id, "data": config.HOJE})])
+    _store().add_documents(
+        [Document(page_content=resumo, metadata={"reporter": reporter_id, "data": config.HOJE})]
+    )
     return f"Apuracao salva para '{reporter_id}' em {config.HOJE}."
 
 
@@ -67,11 +80,14 @@ class LembrarApuracaoArgs(BaseModel):
 def lembrar_apuracao(consulta: str, reporter_id: str) -> str:
     """Recupera apuracoes anteriores do reporter por similaridade semantica.
     Use quando o usuario fizer referencia ao passado ('aquele fornecedor', 'semana passada')."""
-    docs = _ltm_episodica.similarity_search(consulta, k=3,
-                                            filter=lambda d: d.metadata.get("reporter") == reporter_id)
+    docs = _store().similarity_search(
+        consulta, k=3, filter=lambda d: d.metadata.get("reporter") == reporter_id
+    )
     if not docs:
         return "Nenhuma apuracao anterior encontrada."
     return "\n".join(f"* [{d.metadata['data']}] {d.page_content}" for d in docs)
 
 
-SYSTEM_RESUMO = SystemMessage(content="Resuma a conversa a seguir em ate 5 linhas, mantendo nomes, periodos e valores.")
+SYSTEM_RESUMO = SystemMessage(
+    content="Resuma a conversa a seguir em ate 5 linhas, mantendo nomes, periodos e valores."
+)

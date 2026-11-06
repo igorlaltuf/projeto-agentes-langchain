@@ -4,6 +4,7 @@ Uso: python scripts/download_data.py [--ano 2025]
 
 Fonte: https://www.camara.leg.br/cota-parlamentar/ (arquivos Ano-AAAA.csv.zip)
 """
+
 from __future__ import annotations
 
 import argparse
@@ -15,8 +16,8 @@ from pathlib import Path
 import httpx
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from src import config  # noqa: E402
-from src.data import construir_sqlite  # noqa: E402
+from src import config
+from src.data import construir_sqlite
 
 URL_CEAP = "https://www.camara.leg.br/cotas/Ano-{ano}.csv.zip"
 

@@ -1,4 +1,5 @@
 """Interface Streamlit do ApuraCota: chat com o agente, trajetoria de ferramentas e verificacao."""
+
 from __future__ import annotations
 
 import uuid

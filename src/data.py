@@ -7,6 +7,7 @@ Uso:
     python -m src.data --build-db      # carrega data/ceap_2025.csv em data/ceap.db
     python -m src.data --build-index   # monta indices/ato_mesa a partir de data/ato_mesa.txt
 """
+
 from __future__ import annotations
 
 import argparse
@@ -74,11 +75,24 @@ def construir_sqlite(csv: Path = config.CSV_CEAP, db: Path = config.SQLITE_CEAP)
 
 
 class ConsultaCEAPArgs(BaseModel):
-    query_sql: str = Field(..., description="Consulta SQL SQLite valida, apenas SELECT. "
-                                            "Pode usar JOIN, GROUP BY, subqueries e agregacoes.")
+    query_sql: str = Field(
+        ...,
+        description="Consulta SQL SQLite valida, apenas SELECT. "
+        "Pode usar JOIN, GROUP BY, subqueries e agregacoes.",
+    )
 
 
-PALAVRAS_PROIBIDAS = ["DROP", "DELETE", "UPDATE", "INSERT", "ALTER", "TRUNCATE", "REPLACE", "ATTACH", "PRAGMA"]
+PALAVRAS_PROIBIDAS = [
+    "DROP",
+    "DELETE",
+    "UPDATE",
+    "INSERT",
+    "ALTER",
+    "TRUNCATE",
+    "REPLACE",
+    "ATTACH",
+    "PRAGMA",
+]
 
 
 @tool(args_schema=ConsultaCEAPArgs)
@@ -113,13 +127,15 @@ def _embeddings() -> OpenAIEmbeddings:
     return OpenAIEmbeddings(model=config.MODELO_EMBEDDINGS)
 
 
-def construir_indice(texto_normas: Path = config.DATA_DIR / "ato_mesa.txt",
-                     destino: Path = config.INDICE_ATO_MESA) -> int:
+def construir_indice(
+    texto_normas: Path = config.DATA_DIR / "ato_mesa.txt", destino: Path = config.INDICE_ATO_MESA
+) -> int:
     """Monta e salva o índice FAISS da base normativa. Retorna o número de chunks."""
     texto = texto_normas.read_text(encoding="utf-8")
     doc = Document(page_content=texto, metadata={"fonte": "Ato da Mesa 43/2009 (consolidado)"})
-    splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=100,
-                                              separators=["\n\n", "\n", ". ", " ", ""])
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=500, chunk_overlap=100, separators=["\n\n", "\n", ". ", " ", ""]
+    )
     chunks = splitter.split_documents([doc])
     for i, c in enumerate(chunks):
         c.metadata["chunk_id"] = f"CHK_{i:03d}"
@@ -139,9 +155,11 @@ def ferramenta_regras_cota(k: int = 3):
     return create_retriever_tool(
         retriever,
         name="consultar_regras_cota",
-        description=("Busca nas regras da cota parlamentar (Ato da Mesa 43/2009 e FAQ) o que a cota "
-                     "pode ou nao pagar, limites mensais por UF e prazos de prestacao de contas. "
-                     "Reescreva a pergunta do usuario em termos tecnicos antes de buscar."),
+        description=(
+            "Busca nas regras da cota parlamentar (Ato da Mesa 43/2009 e FAQ) o que a cota "
+            "pode ou nao pagar, limites mensais por UF e prazos de prestacao de contas. "
+            "Reescreva a pergunta do usuario em termos tecnicos antes de buscar."
+        ),
     )
 
 

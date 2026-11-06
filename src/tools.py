@@ -8,12 +8,13 @@ Tipos (fase 4 do projeto):
 
 Em MODO_OFFLINE as ferramentas de API leem respostas gravadas em fixtures/.
 """
+
 from __future__ import annotations
 
 import hashlib
 import json
 import statistics
-from typing import Literal, Optional
+from typing import Literal
 
 import httpx
 from langchain_core.tools import tool
@@ -44,8 +45,9 @@ def _get_json(url: str, params: dict | None = None) -> dict:
     resp.raise_for_status()
     dados = resp.json()
     config.FIXTURES_DIR.mkdir(exist_ok=True)
-    caminho.write_text(json.dumps({"_url": url, "_params": params, **dados}, ensure_ascii=False, indent=1),
-                       encoding="utf-8")
+    caminho.write_text(
+        json.dumps({"_url": url, "_params": params, **dados}, ensure_ascii=False, indent=1), encoding="utf-8"
+    )
     return dados
 
 
@@ -54,11 +56,11 @@ def _get_json(url: str, params: dict | None = None) -> dict:
 # --------------------------------------------------------------------------- #
 class BuscarDeputadoArgs(BaseModel):
     nome: str = Field(..., description="Nome ou parte do nome do deputado.")
-    uf: Optional[str] = Field(default=None, description="Sigla da UF para desambiguar (ex: SP).")
+    uf: str | None = Field(default=None, description="Sigla da UF para desambiguar (ex: SP).")
 
 
 @tool(args_schema=BuscarDeputadoArgs)
-def buscar_deputado(nome: str, uf: Optional[str] = None) -> str:
+def buscar_deputado(nome: str, uf: str | None = None) -> str:
     """Busca deputados federais em exercicio pelo nome na API da Camara.
     Retorna id, nome, partido e UF. Se houver mais de um resultado, liste-os
     e peca ao usuario para escolher antes de consultar despesas."""
@@ -76,14 +78,14 @@ def buscar_deputado(nome: str, uf: Optional[str] = None) -> str:
 class ListarDespesasArgs(BaseModel):
     id_deputado: int = Field(..., description="ID numerico do deputado (obtido em buscar_deputado).")
     ano: int = Field(..., description="Ano das despesas, ex: 2025.")
-    mes: Optional[int] = Field(default=None, description="Mes (1-12). Omita para o ano inteiro.")
-    categoria: Optional[str] = Field(default=None,
-                                     description="Filtro por tipo de despesa (ex: 'COMBUSTÍVEIS', 'PASSAGEM AÉREA').")
+    mes: int | None = Field(default=None, description="Mes (1-12). Omita para o ano inteiro.")
+    categoria: str | None = Field(
+        default=None, description="Filtro por tipo de despesa (ex: 'COMBUSTÍVEIS', 'PASSAGEM AÉREA')."
+    )
 
 
 @tool(args_schema=ListarDespesasArgs)
-def listar_despesas(id_deputado: int, ano: int, mes: Optional[int] = None,
-                    categoria: Optional[str] = None) -> str:
+def listar_despesas(id_deputado: int, ano: int, mes: int | None = None, categoria: str | None = None) -> str:
     """Lista as despesas da cota parlamentar (CEAP) de um deputado na API da Camara,
     por ano e opcionalmente por mes e categoria. Retorna JSON com data, tipo,
     fornecedor, CNPJ e valor liquido de cada despesa, mais o total."""
@@ -105,8 +107,9 @@ def listar_despesas(id_deputado: int, ano: int, mes: Optional[int] = None,
         for d in itens
     ]
     total = round(sum(float(d["valor"] or 0) for d in resumo), 2)
-    return json.dumps({"total_registros": len(resumo), "total_valor": total, "despesas": resumo[:50]},
-                      ensure_ascii=False)
+    return json.dumps(
+        {"total_registros": len(resumo), "total_valor": total, "despesas": resumo[:50]}, ensure_ascii=False
+    )
 
 
 # --------------------------------------------------------------------------- #
@@ -140,7 +143,8 @@ def dados_fornecedor(cnpj: str) -> str:
 class EstatisticasArgs(BaseModel):
     valores: list[float] = Field(..., description="Lista de valores numericos.")
     operacao: Literal["soma", "media", "mediana", "maximo", "minimo", "variacao_pct"] = Field(
-        ..., description="Operacao. 'variacao_pct' usa os dois primeiros valores: (v2-v1)/v1*100.")
+        ..., description="Operacao. 'variacao_pct' usa os dois primeiros valores: (v2-v1)/v1*100."
+    )
 
 
 @tool(args_schema=EstatisticasArgs)

@@ -1,4 +1,5 @@
 """Configuração central: modelos, caminhos e modo offline."""
+
 from __future__ import annotations
 
 import os

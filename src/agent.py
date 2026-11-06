@@ -5,6 +5,7 @@ Nota de equivalencia para o relatorio: 'initialize_agent' / 'AgentExecutor' /
 ciclo raciocinio -> acao -> observacao sobre LangGraph, e o checkpointer cumpre o
 papel do historico por sessao.
 """
+
 from __future__ import annotations
 
 from langchain.agents import create_agent
@@ -19,9 +20,11 @@ def montar_agente(com_sql: bool = True, com_rag: bool = True, com_memoria_episod
     toolkit = tools.toolkit_basico()
     if com_sql:
         from src.data import consultar_ceap
+
         toolkit.append(consultar_ceap)
     if com_rag:
         from src.data import ferramenta_regras_cota
+
         toolkit.append(ferramenta_regras_cota())
     if com_memoria_episodica:
         toolkit += [gravar_apuracao, lembrar_apuracao]
@@ -29,6 +32,7 @@ def montar_agente(com_sql: bool = True, com_rag: bool = True, com_memoria_episod
     system_prompt = prompts.SYSTEM_PROMPT_PTCF
     if com_sql:
         from src.data import SCHEMA_CEAP
+
         system_prompt += "\n# SCHEMA DO BANCO LOCAL\n" + SCHEMA_CEAP
 
     return create_agent(

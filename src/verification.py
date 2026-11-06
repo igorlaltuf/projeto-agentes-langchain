@@ -2,11 +2,12 @@
 
 Roda dentro do agente como último passo antes da resposta final.
 """
+
 from __future__ import annotations
 
 import json
 import sqlite3
-from typing import Any, List, Literal, Optional
+from typing import Any, Literal
 
 from langchain_openai import ChatOpenAI
 from pydantic import BaseModel, Field
@@ -17,27 +18,45 @@ from src import config
 class ExtractedClaim(BaseModel):
     claim_text: str = Field(description="Trecho exato da afirmacao numerica na resposta.")
     canonical_key: Literal[
-        "gasto_total", "gasto_categoria", "media_partido", "media_uf",
-        "valor_fornecedor", "variacao_pct", "limite_cota_uf", "artigo_citado", "unmapped_metric",
+        "gasto_total",
+        "gasto_categoria",
+        "media_partido",
+        "media_uf",
+        "valor_fornecedor",
+        "variacao_pct",
+        "limite_cota_uf",
+        "artigo_citado",
+        "unmapped_metric",
     ] = Field(description="Chave canonica da metrica afirmada.")
-    claimed_value: Optional[float] = Field(default=None, description="Valor numerico afirmado, se houver.")
+    claimed_value: float | None = Field(default=None, description="Valor numerico afirmado, se houver.")
     unit: str = Field(description="Unidade: BRL, pct, artigo ou texto.")
-    contexto: Optional[str] = Field(default=None, description="Deputado/partido/periodo/categoria a que se refere.")
+    contexto: str | None = Field(
+        default=None, description="Deputado/partido/periodo/categoria a que se refere."
+    )
 
 
 class ClaimExtractionList(BaseModel):
-    claims: List[ExtractedClaim]
+    claims: list[ExtractedClaim]
 
 
 class LogicalCoherenceReport(BaseModel):
     nli_verdict: Literal["APOIA", "REFUTA", "NEUTRA"]
     is_logically_coherent: bool
-    detected_fallacies: List[Literal["Erro de Calculo", "Contradicao Premissa-Conclusao",
-                                     "Violacao de Escopo", "Periodo Trocado", "Nenhuma"]]
+    detected_fallacies: list[
+        Literal[
+            "Erro de Calculo",
+            "Contradicao Premissa-Conclusao",
+            "Violacao de Escopo",
+            "Periodo Trocado",
+            "Nenhuma",
+        ]
+    ]
     technical_justification: str = Field(description="Justificativa em portugues do Brasil.")
 
 
-def fonte_autoritativa(consultas_sql: dict[str, str], tolerancia_brl: float = 0.01) -> dict[str, dict[str, Any]]:
+def fonte_autoritativa(
+    consultas_sql: dict[str, str], tolerancia_brl: float = 0.01
+) -> dict[str, dict[str, Any]]:
     """Recalcula no SQLite os valores oficiais das chaves canonicas.
 
     consultas_sql: {chave_canonica: "SELECT ... AS valor ..."} montadas pelo agente a partir do contexto.
@@ -53,8 +72,9 @@ def fonte_autoritativa(consultas_sql: dict[str, str], tolerancia_brl: float = 0.
     return truth
 
 
-def verificar_resposta(texto_resposta: str, truth: dict[str, dict[str, Any]],
-                       llm: ChatOpenAI | None = None) -> dict:
+def verificar_resposta(
+    texto_resposta: str, truth: dict[str, dict[str, Any]], llm: ChatOpenAI | None = None
+) -> dict:
     """Tres etapas: extracao estruturada -> fact-checking deterministico -> NLI."""
     llm = llm or ChatOpenAI(model=config.MODELO_JUIZ, temperature=0)
 
@@ -72,8 +92,15 @@ def verificar_resposta(texto_resposta: str, truth: dict[str, dict[str, Any]],
         else:
             delta = abs(c.claimed_value - ref["value"])
             status = "CONFIRMADO" if delta <= ref["tolerance"] else "CONTRADITORIO"
-        fact_check.append({"claim": c.claim_text, "chave": c.canonical_key,
-                           "alegado": c.claimed_value, "oficial": (ref or {}).get("value"), "status": status})
+        fact_check.append(
+            {
+                "claim": c.claim_text,
+                "chave": c.canonical_key,
+                "alegado": c.claimed_value,
+                "oficial": (ref or {}).get("value"),
+                "status": status,
+            }
+        )
 
     avaliador = llm.with_structured_output(LogicalCoherenceReport)
     relatorio = avaliador.invoke(
