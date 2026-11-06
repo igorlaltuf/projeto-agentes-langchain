@@ -1,0 +1,19 @@
+# segredos
+.env
+
+# ambiente
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# dados e índices (grandes; gerados pelos scripts)
+data/*
+!data/.gitkeep
+indices/*
+!indices/.gitkeep
+
+# saídas locais
+*.db
+logs/
+.streamlit/secrets.toml
