@@ -33,6 +33,7 @@ dev = [
 package = false
 
 [tool.ruff]
+extend-exclude = ["notebooks"]
 line-length = 110
 target-version = "py312"
 

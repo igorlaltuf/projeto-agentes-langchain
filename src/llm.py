@@ -161,6 +161,28 @@ def _tool_call(nome: str, args: dict, n: int) -> AIMessage:
     return AIMessage(content="", tool_calls=[{"name": nome, "args": args, "id": f"call_offline_{n}"}])
 
 
+def _formatar_sql(conteudo: str) -> str:
+    """Formata o retorno de consultar_ceap: valores unicos viram R$, listas viram linhas."""
+    import ast
+
+    rodape = f"Fonte: CSV CEAP {config.ANO_CEAP} (banco local)."
+    if not conteudo.startswith(("1 registros", "2 registros", "3 registros", "4 registros", "5 registros")):
+        return f"Resultado do banco local da CEAP: {conteudo[:500]}\n{rodape}"
+    try:
+        registros = ast.literal_eval(conteudo.split(": ", 1)[1])
+    except (ValueError, SyntaxError):
+        return f"Resultado do banco local da CEAP: {conteudo[:500]}\n{rodape}"
+    if len(registros) == 1 and len(registros[0]) == 1:
+        chave, valor = next(iter(registros[0].items()))
+        return f"{chave.replace('_', ' ').capitalize()}: {_brl(float(valor))} em {config.ANO_CEAP}. {rodape}"
+    linhas = []
+    for r in registros:
+        valor = next((v for v in r.values() if isinstance(v, (int, float))), None)
+        rotulo = " | ".join(str(v) for v in r.values() if not isinstance(v, (int, float)))
+        linhas.append(f"- {rotulo}: {_brl(float(valor))}" if valor is not None else f"- {rotulo}")
+    return "Resultado do banco local da CEAP:\n" + "\n".join(linhas) + f"\n{rodape}"
+
+
 def _brl(v: float) -> str:
     return "R$ " + f"{v:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
@@ -221,6 +243,12 @@ class ChatRoteirizado(BaseChatModel):
             return self._consulta_sql(texto, ctx, n)
         if nome := _nome_deputado(texto):
             return _tool_call("buscar_deputado", {"nome": nome, "uf": _uf(texto)}, n)
+        if ctx.get("id") and (_categoria(texto) or re.search(r"gast|despes|quanto", t)):
+            # pergunta de acompanhamento ("e com passagens?") reaproveita o deputado do contexto
+            args: dict[str, Any] = {"id_deputado": ctx["id"], "ano": ctx.get("ano", config.ANO_CEAP)}
+            if _categoria(texto):
+                args["categoria"] = _categoria(texto)
+            return _tool_call("listar_despesas", args, n)
         if re.search(r"\b(oi|olá|ola|bom dia|boa tarde|boa noite)\b", t):
             return AIMessage(
                 content="Olá! Sou o ApuraCota (modo offline). Pergunte sobre gastos da cota parlamentar."
@@ -283,9 +311,8 @@ class ChatRoteirizado(BaseChatModel):
                 )
             )
         if nome == "consultar_ceap":
-            return AIMessage(
-                content=f"Resultado do banco local da CEAP ({config.ANO_CEAP}): {conteudo[:600]}\nFonte: CSV CEAP {config.ANO_CEAP}."
-            )
+            return AIMessage(content=_formatar_sql(conteudo))
+
         if nome == "consultar_regras_cota":
             return AIMessage(
                 content="Segundo o Ato da Mesa 43/2009 (trechos recuperados):\n" + conteudo[:800]

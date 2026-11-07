@@ -25,7 +25,7 @@ def test_memoria_entre_turnos_usa_partido_do_contexto():
     (ferramenta, args), *_ = decisoes(est)
     assert ferramenta == "consultar_ceap"
     assert "partido='PSB'" in args["query_sql"] and "COMBUST" in args["query_sql"]
-    assert "48849.91" in est["messages"][-1].content or "media_por_deputado" in est["messages"][-1].content
+    assert "Media por deputado: R$" in est["messages"][-1].content
 
 
 def test_threads_sao_isoladas():
