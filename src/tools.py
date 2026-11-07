@@ -75,6 +75,14 @@ def buscar_deputado(nome: str, uf: str | None = None) -> str:
     return "\n".join(linhas)
 
 
+MAX_PAGINAS = 12  # 12 x 100 itens cobre um ano inteiro da maioria dos deputados
+
+
+def legislatura_do_ano(ano: int) -> int:
+    """Legislaturas de 4 anos: a 51a comecou em 1999, a 57a em 2023."""
+    return 51 + (ano - 1999) // 4
+
+
 class ListarDespesasArgs(BaseModel):
     id_deputado: int = Field(..., description="ID numerico do deputado (obtido em buscar_deputado).")
     ano: int = Field(..., description="Ano das despesas, ex: 2025.")
@@ -89,11 +97,25 @@ def listar_despesas(id_deputado: int, ano: int, mes: int | None = None, categori
     """Lista as despesas da cota parlamentar (CEAP) de um deputado na API da Camara,
     por ano e opcionalmente por mes e categoria. Retorna JSON com data, tipo,
     fornecedor, CNPJ e valor liquido de cada despesa, mais o total."""
-    params = {"ano": ano, "itens": 100, "ordem": "ASC", "ordenarPor": "dataDocumento"}
+    # A API so devolve despesas quando recebe tambem a legislatura (57 = 2023-2026).
+    params = {
+        "idLegislatura": legislatura_do_ano(ano),
+        "ano": ano,
+        "itens": 100,
+        "ordem": "ASC",
+        "ordenarPor": "dataDocumento",
+    }
     if mes:
         params["mes"] = mes
-    dados = _get_json(f"{config.API_CAMARA}/deputados/{id_deputado}/despesas", params)
-    itens = dados.get("dados", [])
+    # A API pagina em 100 itens; percorre as paginas (limite de seguranca em MAX_PAGINAS).
+    itens: list[dict] = []
+    for pagina in range(1, MAX_PAGINAS + 1):
+        dados = _get_json(
+            f"{config.API_CAMARA}/deputados/{id_deputado}/despesas", {**params, "pagina": pagina}
+        )
+        itens += dados.get("dados", [])
+        if not any(link.get("rel") == "next" for link in dados.get("links", [])):
+            break
     if categoria:
         itens = [d for d in itens if categoria.lower() in d.get("tipoDespesa", "").lower()]
     resumo = [
@@ -107,8 +129,20 @@ def listar_despesas(id_deputado: int, ano: int, mes: int | None = None, categori
         for d in itens
     ]
     total = round(sum(float(d["valor"] or 0) for d in resumo), 2)
+    por_tipo: dict[str, float] = {}
+    for d in resumo:
+        por_tipo[d["tipo"]] = round(por_tipo.get(d["tipo"], 0) + float(d["valor"] or 0), 2)
     return json.dumps(
-        {"total_registros": len(resumo), "total_valor": total, "despesas": resumo[:50]}, ensure_ascii=False
+        {
+            "id_deputado": id_deputado,
+            "ano": ano,
+            "mes": mes,
+            "total_registros": len(resumo),
+            "total_valor": total,
+            "total_por_tipo": dict(sorted(por_tipo.items(), key=lambda kv: -kv[1])),
+            "amostra_despesas": resumo[:30],
+        },
+        ensure_ascii=False,
     )
 
 

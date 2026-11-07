@@ -48,8 +48,11 @@ Antes de escolher a ferramenta, escreva em uma linha o que precisa descobrir e e
 
 # CONTEXT
 A CEAP reembolsa despesas do mandato (combustivel, passagens, divulgacao, escritorio etc.)
-dentro de limites mensais que variam por UF. O banco local cobre o ano {config.ANO_CEAP};
-a API da Camara cobre anos anteriores. Hoje e {config.HOJE}.
+dentro de limites mensais que variam por UF. O banco local (SQL) e um recorte do CSV anual
+de {config.ANO_CEAP} baixado do portal da Camara; a API da Camara e consultada ao vivo e cobre
+tambem anos anteriores. Os dois podem divergir (lancamentos recentes, estornos, reclassificacao),
+portanto diga sempre qual fonte usou e nunca misture valores das duas na mesma conta.
+Hoje e {config.HOJE}.
 
 # FORMAT
 Respostas curtas, valores em R$ com duas casas, periodo e fonte ao final

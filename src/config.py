@@ -18,6 +18,7 @@ INDICES_DIR = RAIZ / "indices"
 ANO_CEAP = 2025
 CSV_CEAP = DATA_DIR / f"ceap_{ANO_CEAP}.csv"
 SQLITE_CEAP = DATA_DIR / "ceap.db"
+TEXTO_NORMAS = DATA_DIR / "normas" / "ato_mesa_43_2009.txt"
 INDICE_ATO_MESA = INDICES_DIR / "ato_mesa"
 
 MODO_OFFLINE = os.getenv("MODO_OFFLINE", "false").lower() == "true"

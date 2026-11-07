@@ -28,8 +28,15 @@ TABELA = "despesas_ceap"
 
 SCHEMA_CEAP = f"""
 Tabela SQLite '{TABELA}' (uma linha por despesa reembolsada pela cota):
-  nome_parlamentar TEXT, partido TEXT, uf TEXT, categoria TEXT,
-  fornecedor TEXT, cnpj_cpf TEXT, valor REAL, ano INTEGER, mes INTEGER, data TEXT
+  id_deputado INTEGER (mesmo id da API da Camara; NULL para liderancas partidarias),
+  nome_parlamentar TEXT, partido TEXT, uf TEXT, categoria TEXT, especificacao TEXT,
+  fornecedor TEXT, cnpj_cpf TEXT (somente digitos), valor REAL (liquido; negativo = estorno),
+  ano INTEGER, mes INTEGER, data TEXT (AAAA-MM-DD)
+Categorias (valores exatos de 'categoria'): 'COMBUSTÍVEIS E LUBRIFICANTES.', 'PASSAGEM AÉREA - SIGEPA',
+  'MANUTENÇÃO DE ESCRITÓRIO DE APOIO À ATIVIDADE PARLAMENTAR', 'SERVIÇO DE TÁXI, PEDÁGIO E ESTACIONAMENTO',
+  'DIVULGAÇÃO DA ATIVIDADE PARLAMENTAR.', 'TELEFONIA', 'FORNECIMENTO DE ALIMENTAÇÃO DO PARLAMENTAR',
+  'HOSPEDAGEM ,EXCETO DO PARLAMENTAR NO DISTRITO FEDERAL.', 'LOCAÇÃO OU FRETAMENTO DE VEÍCULOS AUTOMOTORES',
+  entre outras. Prefira LIKE '%COMBUST%' a igualdade exata. Nomes estao como 'Tabata Amaral' (use LIKE).
 Exemplos de consulta:
   -- gasto de um deputado por categoria
   SELECT categoria, ROUND(SUM(valor),2) AS total FROM {TABELA}
@@ -45,10 +52,12 @@ Exemplos de consulta:
 
 # Mapeamento das colunas do CSV oficial da CEAP para o schema local
 COLUNAS_CSV = {
+    "ideCadastro": "id_deputado",
     "txNomeParlamentar": "nome_parlamentar",
     "sgPartido": "partido",
     "sgUF": "uf",
     "txtDescricao": "categoria",
+    "txtDescricaoEspecificacao": "especificacao",
     "txtFornecedor": "fornecedor",
     "txtCNPJCPF": "cnpj_cpf",
     "vlrLiquido": "valor",
@@ -63,14 +72,20 @@ COLUNAS_CSV = {
 # --------------------------------------------------------------------------- #
 def construir_sqlite(csv: Path = config.CSV_CEAP, db: Path = config.SQLITE_CEAP) -> int:
     """Carrega o CSV da CEAP no SQLite. Retorna o número de linhas."""
-    df = pd.read_csv(csv, sep=";", encoding="utf-8", low_memory=False)
+    # O arquivo oficial vem com BOM, separador ';' e decimal com ponto.
+    df = pd.read_csv(csv, sep=";", encoding="utf-8-sig", low_memory=False, dtype=str)
     df = df[list(COLUNAS_CSV)].rename(columns=COLUNAS_CSV)
-    df["valor"] = pd.to_numeric(df["valor"].astype(str).str.replace(",", "."), errors="coerce").fillna(0)
-    df["cnpj_cpf"] = df["cnpj_cpf"].astype(str).str.replace(r"\D", "", regex=True)
+    df["valor"] = pd.to_numeric(df["valor"].str.replace(",", "."), errors="coerce").fillna(0).round(2)
+    df["id_deputado"] = pd.to_numeric(df["id_deputado"], errors="coerce").astype("Int64")
+    for col in ("ano", "mes"):
+        df[col] = pd.to_numeric(df[col], errors="coerce").astype("Int64")
+    df["cnpj_cpf"] = df["cnpj_cpf"].fillna("").str.replace(r"\D", "", regex=True)
+    df["data"] = df["data"].fillna("").str.slice(0, 10)
     with sqlite3.connect(db) as conn:
         df.to_sql(TABELA, conn, if_exists="replace", index=False)
         conn.execute(f"CREATE INDEX IF NOT EXISTS idx_nome ON {TABELA}(nome_parlamentar)")
-        conn.execute(f"CREATE INDEX IF NOT EXISTS idx_partido ON {TABELA}(partido, ano)")
+        conn.execute(f"CREATE INDEX IF NOT EXISTS idx_id ON {TABELA}(id_deputado, ano, mes)")
+        conn.execute(f"CREATE INDEX IF NOT EXISTS idx_partido ON {TABELA}(partido, uf, ano)")
     return len(df)
 
 
@@ -127,9 +142,7 @@ def _embeddings() -> OpenAIEmbeddings:
     return OpenAIEmbeddings(model=config.MODELO_EMBEDDINGS)
 
 
-def construir_indice(
-    texto_normas: Path = config.DATA_DIR / "ato_mesa.txt", destino: Path = config.INDICE_ATO_MESA
-) -> int:
+def construir_indice(texto_normas: Path = config.TEXTO_NORMAS, destino: Path = config.INDICE_ATO_MESA) -> int:
     """Monta e salva o índice FAISS da base normativa. Retorna o número de chunks."""
     texto = texto_normas.read_text(encoding="utf-8")
     doc = Document(page_content=texto, metadata={"fonte": "Ato da Mesa 43/2009 (consolidado)"})

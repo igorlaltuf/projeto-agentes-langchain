@@ -1,0 +1,90 @@
+{
+ "_url": "https://dadosabertos.camara.leg.br/api/v2/deputados",
+ "_params": {
+  "nome": "Silva",
+  "ordem": "ASC",
+  "ordenarPor": "nome"
+ },
+ "dados": [
+  {
+   "id": 73701,
+   "uri": "https://dadosabertos.camara.leg.br/api/v2/deputados/73701",
+   "nome": "Benedita da Silva",
+   "siglaPartido": "PT",
+   "uriPartido": "https://dadosabertos.camara.leg.br/api/v2/partidos/36844",
+   "siglaUf": "RJ",
+   "idLegislatura": 57,
+   "urlFoto": "https://www.camara.leg.br/internet/deputado/bandep/73701.jpg",
+   "email": "dep.beneditadasilva@camara.leg.br"
+  },
+  {
+   "id": 220574,
+   "uri": "https://dadosabertos.camara.leg.br/api/v2/deputados/220574",
+   "nome": "Cabo Gilberto Silva",
+   "siglaPartido": "PL",
+   "uriPartido": "https://dadosabertos.camara.leg.br/api/v2/partidos/37906",
+   "siglaUf": "PB",
+   "idLegislatura": 57,
+   "urlFoto": "https://www.camara.leg.br/internet/deputado/bandep/220574.jpg",
+   "email": "dep.cabogilbertosilva@camara.leg.br"
+  },
+  {
+   "id": 220637,
+   "uri": "https://dadosabertos.camara.leg.br/api/v2/deputados/220637",
+   "nome": "Marina Silva",
+   "siglaPartido": "REDE",
+   "uriPartido": "https://dadosabertos.camara.leg.br/api/v2/partidos/36886",
+   "siglaUf": "SP",
+   "idLegislatura": 57,
+   "urlFoto": "https://www.camara.leg.br/internet/deputado/bandep/220637.jpg",
+   "email": "dep.marinasilva@camara.leg.br"
+  },
+  {
+   "id": 178987,
+   "uri": "https://dadosabertos.camara.leg.br/api/v2/deputados/178987",
+   "nome": "Orlando Silva",
+   "siglaPartido": "PCdoB",
+   "uriPartido": "https://dadosabertos.camara.leg.br/api/v2/partidos/36779",
+   "siglaUf": "SP",
+   "idLegislatura": 57,
+   "urlFoto": "https://www.camara.leg.br/internet/deputado/bandep/178987.jpg",
+   "email": "dep.orlandosilva@camara.leg.br"
+  },
+  {
+   "id": 175765,
+   "uri": "https://dadosabertos.camara.leg.br/api/v2/deputados/175765",
+   "nome": "Ribamar Silva",
+   "siglaPartido": "PODE",
+   "uriPartido": "https://dadosabertos.camara.leg.br/api/v2/partidos/36896",
+   "siglaUf": "SP",
+   "idLegislatura": 57,
+   "urlFoto": "https://www.camara.leg.br/internet/deputado/bandep/175765.jpg",
+   "email": "dep.ribamarsilva@camara.leg.br"
+  },
+  {
+   "id": 160632,
+   "uri": "https://dadosabertos.camara.leg.br/api/v2/deputados/160632",
+   "nome": "Zé Silva",
+   "siglaPartido": "UNIÃO",
+   "uriPartido": "https://dadosabertos.camara.leg.br/api/v2/partidos/38009",
+   "siglaUf": "MG",
+   "idLegislatura": 57,
+   "urlFoto": "https://www.camara.leg.br/internet/deputado/bandep/160632.jpg",
+   "email": "dep.zesilva@camara.leg.br"
+  }
+ ],
+ "links": [
+  {
+   "rel": "self",
+   "href": "https://dadosabertos.camara.leg.br/api/v2/deputados?nome=Silva&ordem=ASC&ordenarPor=nome"
+  },
+  {
+   "rel": "first",
+   "href": "https://dadosabertos.camara.leg.br/api/v2/deputados?nome=Silva&ordem=ASC&ordenarPor=nome&pagina=1&itens=1000"
+  },
+  {
+   "rel": "last",
+   "href": "https://dadosabertos.camara.leg.br/api/v2/deputados?nome=Silva&ordem=ASC&ordenarPor=nome&pagina=1&itens=1000"
+  }
+ ]
+}

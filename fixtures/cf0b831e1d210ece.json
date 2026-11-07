@@ -1,0 +1,130 @@
+{
+ "_url": "https://brasilapi.com.br/api/cnpj/v1/10951191000120",
+ "_params": null,
+ "uf": "SP",
+ "cep": "01442010",
+ "qsa": [
+  {
+   "pais": null,
+   "nome_socio": "MARIA CAROLINA TREVISAN",
+   "codigo_pais": null,
+   "faixa_etaria": "Entre 41 a 50 anos",
+   "cnpj_cpf_do_socio": "***987968**",
+   "qualificacao_socio": "Sócio-Administrador",
+   "codigo_faixa_etaria": 5,
+   "data_entrada_sociedade": "2009-06-25",
+   "identificador_de_socio": 2,
+   "cpf_representante_legal": "***000000**",
+   "nome_representante_legal": "",
+   "codigo_qualificacao_socio": 49,
+   "qualificacao_representante_legal": "Não informada",
+   "codigo_qualificacao_representante_legal": 0
+  }
+ ],
+ "cnpj": "10951191000120",
+ "pais": null,
+ "email": null,
+ "porte": "DEMAIS",
+ "bairro": "JARDIM PAULISTA",
+ "numero": "78",
+ "ddd_fax": "1131385129",
+ "municipio": "SAO PAULO",
+ "logradouro": "MARIETA",
+ "cnae_fiscal": 6391700,
+ "codigo_pais": null,
+ "complemento": "",
+ "codigo_porte": 5,
+ "razao_social": "HUEVOS PRODUCAO E ASSESSORIA S/S LTDA",
+ "nome_fantasia": "",
+ "capital_social": 1000,
+ "ddd_telefone_1": "1193764077",
+ "ddd_telefone_2": "",
+ "opcao_pelo_mei": false,
+ "codigo_municipio": 7107,
+ "cnaes_secundarios": [
+  {
+   "codigo": 5811500,
+   "descricao": "Edição de livros"
+  },
+  {
+   "codigo": 5911102,
+   "descricao": "Produção de filmes para publicidade"
+  },
+  {
+   "codigo": 5911199,
+   "descricao": "Atividades de produção cinematográfica, de vídeos e de programas de televisão não especificadas anteriormente"
+  },
+  {
+   "codigo": 5912099,
+   "descricao": "Atividades de pós-produção cinematográfica, de vídeos e de programas de televisão não especificadas anteriormente"
+  },
+  {
+   "codigo": 5920100,
+   "descricao": "Atividades de gravação de som e de edição de música"
+  },
+  {
+   "codigo": 7220700,
+   "descricao": "Pesquisa e desenvolvimento experimental em ciências sociais e humanas"
+  },
+  {
+   "codigo": 7319003,
+   "descricao": "Marketing direto"
+  },
+  {
+   "codigo": 7320300,
+   "descricao": "Pesquisas de mercado e de opinião pública"
+  },
+  {
+   "codigo": 7420001,
+   "descricao": "Atividades de produção de fotografias, exceto aérea e submarina"
+  },
+  {
+   "codigo": 8211300,
+   "descricao": "Serviços combinados de escritório e apoio administrativo"
+  },
+  {
+   "codigo": 8219999,
+   "descricao": "Preparação de documentos e serviços especializados de apoio administrativo não especificados anteriormente"
+  },
+  {
+   "codigo": 8230001,
+   "descricao": "Serviços de organização de feiras, congressos, exposições e festas"
+  },
+  {
+   "codigo": 8599604,
+   "descricao": "Treinamento em desenvolvimento profissional e gerencial"
+  },
+  {
+   "codigo": 9001999,
+   "descricao": "Artes cênicas, espetáculos e atividades complementares não especificadas anteriormente"
+  },
+  {
+   "codigo": 9002701,
+   "descricao": "Atividades de artistas plásticos, jornalistas independentes e escritores"
+  }
+ ],
+ "natureza_juridica": "Sociedade Simples Limitada",
+ "regime_tributario": [],
+ "situacao_especial": "",
+ "opcao_pelo_simples": true,
+ "situacao_cadastral": 2,
+ "data_opcao_pelo_mei": null,
+ "data_exclusao_do_mei": null,
+ "cnae_fiscal_descricao": "Agências de notícias",
+ "codigo_municipio_ibge": 3550308,
+ "data_inicio_atividade": "2009-06-25",
+ "data_situacao_especial": null,
+ "data_opcao_pelo_simples": "2009-06-25",
+ "data_situacao_cadastral": "2009-06-25",
+ "nome_cidade_no_exterior": "",
+ "codigo_natureza_juridica": 2240,
+ "data_exclusao_do_simples": null,
+ "motivo_situacao_cadastral": 0,
+ "ente_federativo_responsavel": "",
+ "identificador_matriz_filial": 1,
+ "qualificacao_do_responsavel": 49,
+ "descricao_situacao_cadastral": "ATIVA",
+ "descricao_tipo_de_logradouro": "RUA",
+ "descricao_motivo_situacao_cadastral": "SEM MOTIVO",
+ "descricao_identificador_matriz_filial": "MATRIZ"
+}

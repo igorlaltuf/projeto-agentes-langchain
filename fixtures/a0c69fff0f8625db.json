@@ -1,0 +1,35 @@
+{
+ "_url": "https://dadosabertos.camara.leg.br/api/v2/deputados",
+ "_params": {
+  "nome": "Tabata Amaral",
+  "ordem": "ASC",
+  "ordenarPor": "nome"
+ },
+ "dados": [
+  {
+   "id": 204534,
+   "uri": "https://dadosabertos.camara.leg.br/api/v2/deputados/204534",
+   "nome": "Tabata Amaral",
+   "siglaPartido": "PSB",
+   "uriPartido": "https://dadosabertos.camara.leg.br/api/v2/partidos/36832",
+   "siglaUf": "SP",
+   "idLegislatura": 57,
+   "urlFoto": "https://www.camara.leg.br/internet/deputado/bandep/204534.jpg",
+   "email": "dep.tabataamaral@camara.leg.br"
+  }
+ ],
+ "links": [
+  {
+   "rel": "self",
+   "href": "https://dadosabertos.camara.leg.br/api/v2/deputados?nome=Tabata+Amaral&ordem=ASC&ordenarPor=nome"
+  },
+  {
+   "rel": "first",
+   "href": "https://dadosabertos.camara.leg.br/api/v2/deputados?nome=Tabata+Amaral&ordem=ASC&ordenarPor=nome&pagina=1&itens=1000"
+  },
+  {
+   "rel": "last",
+   "href": "https://dadosabertos.camara.leg.br/api/v2/deputados?nome=Tabata+Amaral&ordem=ASC&ordenarPor=nome&pagina=1&itens=1000"
+  }
+ ]
+}
