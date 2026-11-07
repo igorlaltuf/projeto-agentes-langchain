@@ -14,7 +14,7 @@ from __future__ import annotations
 import json
 import os
 import re
-from typing import Any
+from typing import Any, Literal
 
 from langchain_core.embeddings import DeterministicFakeEmbedding, Embeddings
 from langchain_core.language_models import BaseChatModel
@@ -166,21 +166,27 @@ def _brl(v: float) -> str:
 
 
 class ChatRoteirizado(BaseChatModel):
-    """Dummy deterministico: escolhe ferramentas por regras e formata observacoes."""
+    """Dummy deterministico: escolhe ferramentas por regras e formata observacoes.
+
+    Sem ferramentas vinculadas (chains simples) responde em modo texto: JSON heuristico,
+    classificacao de rota, resumo ou eco da pergunta.
+    """
+
+    com_ferramentas: bool = False
 
     @property
     def _llm_type(self) -> str:
         return "roteirizado-offline"
 
     def bind_tools(self, tools: Any, **kwargs: Any) -> Runnable:
-        return self
+        return self.model_copy(update={"com_ferramentas": True})
 
     def get_num_tokens_from_messages(self, messages: list[BaseMessage], tools: Any = None) -> int:
         return sum(len(str(m.content)) // 4 for m in messages)
 
     # ---- saida estruturada ------------------------------------------------- #
     def with_structured_output(self, schema: Any, **kwargs: Any) -> Runnable:
-        return RunnableLambda(lambda entrada: _estruturar(schema, _texto_de(entrada)))
+        return RunnableLambda(lambda entrada: _estruturar(schema, _ultimo_humano(entrada)))
 
     # ---- geracao ----------------------------------------------------------- #
     def _generate(self, messages: list[BaseMessage], stop=None, run_manager=None, **kwargs) -> ChatResult:
@@ -190,6 +196,8 @@ class ChatRoteirizado(BaseChatModel):
     def _decidir(self, messages: list[BaseMessage]) -> AIMessage:
         n = len(messages)
         ultima = messages[-1]
+        if not self.com_ferramentas:
+            return AIMessage(content=_responder_texto(messages))
         ctx = _contexto(messages)
         if isinstance(ultima, ToolMessage):
             return self._apos_ferramenta(ultima, ctx, n)
@@ -292,6 +300,78 @@ class ChatRoteirizado(BaseChatModel):
 # --------------------------------------------------------------------------- #
 # Saida estruturada no modo offline
 # --------------------------------------------------------------------------- #
+def _responder_texto(messages: list[BaseMessage]) -> str:
+    """Modo texto (sem ferramentas): heuristicas para as chains dos notebooks."""
+    prompt = "\n".join(str(m.content) for m in messages).lower()
+    humano = next((str(m.content) for m in reversed(messages) if isinstance(m, HumanMessage)), "")
+    if "classifique" in prompt and "categoria" in prompt:
+        return _rota(humano)
+    if "relev" in prompt and ("alta" in prompt or "baixa" in prompt):
+        return (
+            "alta"
+            if re.search(r"deputad|gast|cota|fornecedor|partido|R\$", humano, re.IGNORECASE)
+            else "baixa"
+        )
+    if "resum" in prompt:
+        return "Resumo (offline): " + re.sub(r"\s+", " ", humano)[:300]
+    if "json" in prompt:
+        return json.dumps(_campos_heuristicos(humano), ensure_ascii=False)
+    return "Resposta offline: " + humano[:300]
+
+
+def _rota(texto: str) -> str:
+    t = texto.lower()
+    if re.search(r"regra|pode pagar|permitid|limite|prazo|vedad", t):
+        return "regra"
+    if re.search(r"m[eé]dia|ranking|maiores|compar|top \d", t):
+        return "sql"
+    if _nome_deputado(texto) or re.search(r"gast|despes", t):
+        return "api"
+    return "conversa"
+
+
+def _campos_heuristicos(texto: str) -> dict[str, Any]:
+    nome = _nome_deputado(texto)
+    rota = _rota(texto)
+    intencao = {"regra": "regra_cota", "sql": "comparar", "api": "consultar_gasto", "conversa": "conversa"}[
+        rota
+    ]
+    if intencao == "conversa" and _categoria(texto):
+        intencao = "consultar_gasto"
+    if re.search(r"fornecedor", texto.lower()):
+        intencao = "ranking_fornecedor"
+    if re.search(r"resum|guard", texto.lower()):
+        intencao = "resumo"
+    faltante = None
+    if intencao in {"consultar_gasto", "ranking_fornecedor"} and not nome:
+        faltante = "deputado"
+    tem_ano = bool(re.search(r"\b20\d{2}\b", texto))
+    return {
+        "intencao": intencao,
+        "nome": nome,
+        "deputado": nome,
+        "partido": _partido(texto),
+        "uf": _uf(texto),
+        "ano": _ano(texto) if tem_ano else None,
+        "mes": _mes(texto),
+        "categoria": _categoria(texto),
+        "fornecedor": None,
+        "periodo": str(_ano(texto)) if tem_ano else None,
+        "dado_faltante": faltante,
+        "rota": rota,
+    }
+
+
+def _ultimo_humano(entrada: Any) -> str:
+    if isinstance(entrada, list):
+        return next(
+            (str(m.content) for m in reversed(entrada) if isinstance(m, HumanMessage)), _texto_de(entrada)
+        )
+    if hasattr(entrada, "to_messages"):
+        return _ultimo_humano(entrada.to_messages())
+    return str(entrada)
+
+
 def _texto_de(entrada: Any) -> str:
     if isinstance(entrada, str):
         return entrada
@@ -350,14 +430,20 @@ def _extrair_claims(schema: Any, texto: str):
 
 
 def _instancia_generica(schema: type[BaseModel], texto: str) -> BaseModel:
-    """Preenche um modelo Pydantic qualquer com valores neutros (para notebooks em modo offline)."""
+    """Preenche um modelo Pydantic qualquer: campos conhecidos por heuristica, o resto com valores neutros."""
+    heur = _campos_heuristicos(texto)
     valores: dict[str, Any] = {}
     for nome, campo in schema.model_fields.items():
-        if not campo.is_required():
-            continue
         tipo = campo.annotation
         origem = getattr(tipo, "__origin__", tipo)
-        if tipo is str:
+        if nome in heur and (heur[nome] is not None or not campo.is_required()):
+            valores[nome] = heur[nome]
+            continue
+        if not campo.is_required():
+            continue
+        if origem is Literal:
+            valores[nome] = tipo.__args__[0]
+        elif tipo is str:
             valores[nome] = texto[:120] if nome in {"texto", "pergunta", "resumo"} else "offline"
         elif tipo is int:
             valores[nome] = 0

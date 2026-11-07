@@ -25,6 +25,7 @@ CASOS = {
         ("Tabata Amaral", "SP"),
         ("Tabata Amaral", None),
         ("Nikolas Ferreira", "MG"),
+        ("Nikolas Ferreira", None),
         ("Silva", None),
     ],
     "despesas": [(204534, 2025, None), (204534, 2024, None), (204534, 2025, 3), (209787, 2025, None)],
