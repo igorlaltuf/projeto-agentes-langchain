@@ -9,10 +9,10 @@ import json
 import sqlite3
 from typing import Any, Literal
 
-from langchain_openai import ChatOpenAI
+from langchain_core.language_models import BaseChatModel
 from pydantic import BaseModel, Field
 
-from src import config
+from src import config, llm
 
 
 class ExtractedClaim(BaseModel):
@@ -72,27 +72,17 @@ def fonte_autoritativa(
     return truth
 
 
-def verificar_resposta(
-    texto_resposta: str, truth: dict[str, dict[str, Any]], llm: ChatOpenAI | None = None
-) -> dict:
-    """Tres etapas: extracao estruturada -> fact-checking deterministico -> NLI."""
-    llm = llm or ChatOpenAI(model=config.MODELO_JUIZ, temperature=0)
-
-    extrator = llm.with_structured_output(ClaimExtractionList)
-    claims = extrator.invoke(
-        "Extraia todas as afirmacoes numericas e factuais do texto e mapeie para as chaves canonicas. "
-        f"Responda em portugues.\nTexto: {texto_resposta}"
-    )
-
-    fact_check = []
-    for c in claims.claims:
+def checar_claims(claims: list[ExtractedClaim], truth: dict[str, dict[str, Any]]) -> list[dict]:
+    """Fact-checking deterministico: compara cada claim com a fonte autoritativa dentro da tolerancia."""
+    resultado = []
+    for c in claims:
         ref = truth.get(c.canonical_key)
         if ref is None or ref.get("value") is None or c.claimed_value is None:
             status = "NAO VERIFICADO"
         else:
             delta = abs(c.claimed_value - ref["value"])
             status = "CONFIRMADO" if delta <= ref["tolerance"] else "CONTRADITORIO"
-        fact_check.append(
+        resultado.append(
             {
                 "claim": c.claim_text,
                 "chave": c.canonical_key,
@@ -101,8 +91,50 @@ def verificar_resposta(
                 "status": status,
             }
         )
+    return resultado
 
-    avaliador = llm.with_structured_output(LogicalCoherenceReport)
+
+def consultas_da_trajetoria(trajetoria: list[dict], ano: int = config.ANO_CEAP) -> dict[str, str]:
+    """Monta as consultas SQL da fonte autoritativa a partir das ferramentas que o agente usou.
+
+    - listar_despesas(id, ano[, categoria]) -> gasto_total ou gasto_categoria recalculados no CSV local
+    - consultar_ceap(SELECT AVG ...)        -> media_partido / media_uf reexecutadas
+    """
+    consultas: dict[str, str] = {}
+    for passo in trajetoria:
+        if passo.get("tipo") != "decisao":
+            continue
+        args = passo.get("args", {})
+        if passo["ferramenta"] == "listar_despesas" and args.get("ano") == ano:
+            filtro = f" AND categoria LIKE '%{args['categoria']}%'" if args.get("categoria") else ""
+            chave = "gasto_categoria" if args.get("categoria") else "gasto_total"
+            mes = f" AND mes={args['mes']}" if args.get("mes") else ""
+            consultas[chave] = (
+                f"SELECT ROUND(SUM(valor),2) FROM despesas_ceap WHERE id_deputado={int(args['id_deputado'])} "
+                f"AND ano={ano}{mes}{filtro}"
+            )
+        elif passo["ferramenta"] == "consultar_ceap":
+            sql = args.get("query_sql", "")
+            if "AVG(" in sql.upper():
+                chave = "media_uf" if "uf=" in sql.lower() else "media_partido"
+                consultas[chave] = sql
+    return consultas
+
+
+def verificar_resposta(
+    texto_resposta: str, truth: dict[str, dict[str, Any]], modelo: BaseChatModel | None = None
+) -> dict:
+    """Tres etapas: extracao estruturada (LLM) -> fact-checking deterministico -> NLI (LLM)."""
+    modelo = modelo or llm.chat_model("juiz")
+
+    extrator = modelo.with_structured_output(ClaimExtractionList)
+    claims = extrator.invoke(
+        "Extraia todas as afirmacoes numericas e factuais do texto e mapeie para as chaves canonicas. "
+        f"Responda em portugues.\nTexto: {texto_resposta}"
+    )
+    fact_check = checar_claims(claims.claims, truth)
+
+    avaliador = modelo.with_structured_output(LogicalCoherenceReport)
     relatorio = avaliador.invoke(
         "Atue como auditor NLI. Compare a resposta do agente com os registros oficiais. "
         "Avalie calculos, periodos, contradicoes premissa-conclusao e violacoes de escopo. "
@@ -110,3 +142,12 @@ def verificar_resposta(
         f"REGISTROS: {json.dumps(truth, ensure_ascii=False)}\nRESPOSTA: {texto_resposta}"
     )
     return {"fact_check": fact_check, "nli": relatorio.model_dump()}
+
+
+def verificar_turno(texto_resposta: str, trajetoria: list[dict], modelo: BaseChatModel | None = None) -> dict:
+    """Atalho usado pelo Streamlit e pelos notebooks: trajetoria -> truth -> verificacao."""
+    consultas = consultas_da_trajetoria(trajetoria)
+    truth = fonte_autoritativa(consultas) if consultas else {}
+    saida = verificar_resposta(texto_resposta, truth, modelo)
+    saida["truth"] = truth
+    return saida

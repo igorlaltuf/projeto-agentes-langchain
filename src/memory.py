@@ -13,11 +13,10 @@ from langchain_core.documents import Document
 from langchain_core.messages import SystemMessage, trim_messages
 from langchain_core.tools import tool
 from langchain_core.vectorstores import InMemoryVectorStore
-from langchain_openai import OpenAIEmbeddings
 from langgraph.checkpoint.memory import MemorySaver
 from pydantic import BaseModel, Field
 
-from src import config
+from src import config, llm
 
 
 # ----------------------------------------------------------------------------- #
@@ -50,7 +49,7 @@ def _store() -> InMemoryVectorStore:
     """Cria o vector store episódico sob demanda (evita exigir a chave da OpenAI no import)."""
     global _ltm_episodica
     if _ltm_episodica is None:
-        _ltm_episodica = InMemoryVectorStore(embedding=OpenAIEmbeddings(model=config.MODELO_EMBEDDINGS))
+        _ltm_episodica = InMemoryVectorStore(embedding=llm.embeddings())
     return _ltm_episodica
 
 

@@ -22,6 +22,7 @@
       "fixtures": "uv run python scripts/record_fixtures.py",
       "notebook": "uv run jupyter lab notebooks/",
       "lint": "uv run ruff check . && uv run ruff format --check .",
+      "test": "MODO_OFFLINE=true uv run pytest",
       "check": "uv run python -c 'import src.agent, src.data, src.verification; print(\"imports ok\")'"
     }
   }

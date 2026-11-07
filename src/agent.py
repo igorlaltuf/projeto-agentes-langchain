@@ -9,14 +9,13 @@ papel do historico por sessao.
 from __future__ import annotations
 
 from langchain.agents import create_agent
-from langchain_openai import ChatOpenAI
 
-from src import config, prompts, tools
+from src import llm, prompts, tools
 from src.memory import gravar_apuracao, lembrar_apuracao, novo_checkpointer
 
 
 def montar_agente(com_sql: bool = True, com_rag: bool = True, com_memoria_episodica: bool = True):
-    llm = ChatOpenAI(model=config.MODELO_AGENTE, temperature=0)
+    modelo = llm.chat_model("agente")
     toolkit = tools.toolkit_basico()
     if com_sql:
         from src.data import consultar_ceap
@@ -36,7 +35,7 @@ def montar_agente(com_sql: bool = True, com_rag: bool = True, com_memoria_episod
         system_prompt += "\n# SCHEMA DO BANCO LOCAL\n" + SCHEMA_CEAP
 
     return create_agent(
-        model=llm,
+        model=modelo,
         tools=toolkit,
         system_prompt=system_prompt,
         checkpointer=novo_checkpointer(),

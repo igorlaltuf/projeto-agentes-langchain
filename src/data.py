@@ -18,11 +18,10 @@ import pandas as pd
 from langchain_community.vectorstores import FAISS
 from langchain_core.documents import Document
 from langchain_core.tools import create_retriever_tool, tool
-from langchain_openai import OpenAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from pydantic import BaseModel, Field
 
-from src import config
+from src import config, llm
 
 TABELA = "despesas_ceap"
 
@@ -138,8 +137,8 @@ def consultar_ceap(query_sql: str) -> str:
 # --------------------------------------------------------------------------- #
 # FAISS: Ato da Mesa 43/2009 + FAQ da cota
 # --------------------------------------------------------------------------- #
-def _embeddings() -> OpenAIEmbeddings:
-    return OpenAIEmbeddings(model=config.MODELO_EMBEDDINGS)
+def _embeddings():
+    return llm.embeddings()
 
 
 def construir_indice(texto_normas: Path = config.TEXTO_NORMAS, destino: Path = config.INDICE_ATO_MESA) -> int:

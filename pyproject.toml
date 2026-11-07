@@ -25,6 +25,7 @@ dependencies = [
 dev = [
     "jupyter>=1.1",
     "ipykernel>=6.29",
+    "pytest>=8.3",
     "ruff>=0.8",
 ]
 
@@ -38,3 +39,8 @@ target-version = "py312"
 [tool.ruff.lint]
 # ISC001: strings concatenadas implicitamente em prompts são intencionais
 ignore = ["ISC001", "ISC004"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q -p no:cacheprovider"
+filterwarnings = ["ignore::DeprecationWarning"]
