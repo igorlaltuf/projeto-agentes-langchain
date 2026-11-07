@@ -13,7 +13,7 @@ from src.tools import (
 
 def test_calculadora_soma_e_media():
     assert calcular_estatisticas.invoke({"valores": [1, 2, 3], "operacao": "soma"}) == "soma = 6.0"
-    assert calcular_estatisticas.invoke({"valores": [1, 2, 3], "operacao": "media"}) == "media = 2"
+    assert calcular_estatisticas.invoke({"valores": [1, 2, 3], "operacao": "media"}) == "media = 2.0"
 
 
 def test_calculadora_variacao_percentual():
