@@ -12,7 +12,7 @@ from typing import Any, Literal
 from langchain_core.language_models import BaseChatModel
 from pydantic import BaseModel, Field
 
-from src import config, llm
+from src import config, llm, tools
 
 
 class ExtractedClaim(BaseModel):
@@ -106,7 +106,8 @@ def consultas_da_trajetoria(trajetoria: list[dict], ano: int = config.ANO_CEAP) 
             continue
         args = passo.get("args", {})
         if passo["ferramenta"] == "listar_despesas" and args.get("ano") == ano:
-            filtro = f" AND categoria LIKE '%{args['categoria']}%'" if args.get("categoria") else ""
+            radical = tools.normalizar_categoria(args.get("categoria"))
+            filtro = f" AND categoria LIKE '%{radical}%'" if radical else ""
             chave = "gasto_categoria" if args.get("categoria") else "gasto_total"
             mes = f" AND mes={args['mes']}" if args.get("mes") else ""
             consultas[chave] = (

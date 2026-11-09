@@ -159,7 +159,8 @@ def chain_paralela() -> Runnable:
     def media_partido(pedido: PedidoApuracao) -> str:
         if not pedido.partido:
             return "partido nao informado"
-        filtro = f" AND categoria LIKE '%{pedido.categoria.upper()}%'" if pedido.categoria else ""
+        radical = tools.normalizar_categoria(pedido.categoria)
+        filtro = f" AND categoria LIKE '%{radical}%'" if radical else ""
         sql = (
             "SELECT ROUND(AVG(t.total),2) AS media FROM (SELECT id_deputado, SUM(valor) AS total FROM despesas_ceap "
             f"WHERE partido='{pedido.partido.upper()}' AND ano={pedido.ano or 2025}{filtro} GROUP BY id_deputado) t"

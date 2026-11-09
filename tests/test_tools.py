@@ -64,3 +64,31 @@ def test_cnpj_invalido():
 def test_dados_fornecedor_offline():
     d = json.loads(dados_fornecedor.invoke({"cnpj": "33.927.528/0001-60"}))
     assert d["razao_social"] == "SJR IMOVEIS LTDA"
+
+
+def test_normalizar_categoria_aceita_sinonimos_singular_e_acentos():
+    from src.tools import normalizar_categoria
+
+    assert normalizar_categoria("combustível") == "COMBUST"
+    assert normalizar_categoria("Combustíveis e lubrificantes") == "COMBUST"
+    assert normalizar_categoria("passagens aéreas") == "PASSAGEM"
+    assert normalizar_categoria("hotel") == "HOSPED"
+    assert normalizar_categoria("aluguel de carro") == "FRETAMENTO DE VE"
+    assert normalizar_categoria(None) is None
+    # sem correspondencia: devolve o texto em maiusculas sem acento
+    assert normalizar_categoria("ração") == "RACAO"
+
+
+def test_listar_despesas_filtra_categoria_em_linguagem_natural():
+    import json
+
+    from src.tools import listar_despesas
+
+    plural = json.loads(
+        listar_despesas.invoke({"id_deputado": 204534, "ano": 2025, "categoria": "COMBUSTÍVEIS"})
+    )
+    singular = json.loads(
+        listar_despesas.invoke({"id_deputado": 204534, "ano": 2025, "categoria": "combustível"})
+    )
+    assert plural["total_registros"] > 0
+    assert singular["total_registros"] == plural["total_registros"]

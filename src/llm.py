@@ -23,7 +23,7 @@ from langchain_core.outputs import ChatGeneration, ChatResult
 from langchain_core.runnables import Runnable, RunnableLambda
 from pydantic import BaseModel
 
-from src import config
+from src import config, tools
 
 
 def offline() -> bool:
@@ -109,7 +109,9 @@ def _mes(texto: str) -> int | None:
 
 def _categoria(texto: str) -> str | None:
     t = texto.lower()
-    return next((v for k, v in CATEGORIAS.items() if k in t), None)
+    if not any(k in t for k in CATEGORIAS):
+        return None
+    return tools.normalizar_categoria(texto)
 
 
 def _nome_deputado(texto: str) -> str | None:

@@ -13,7 +13,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import statistics
+import unicodedata
 from typing import Literal
 
 import httpx
@@ -21,6 +23,48 @@ from langchain_core.tools import tool
 from pydantic import BaseModel, Field
 
 from src import config
+
+# --------------------------------------------------------------------------- #
+# categorias de despesa
+# --------------------------------------------------------------------------- #
+# Radicais SEM acento que ocorrem tanto em 'tipoDespesa' (API) quanto em 'categoria' (CSV/SQLite),
+# para que o mesmo filtro sirva ao LIKE do SQL e ao filtro em Python. Ordem importa.
+CATEGORIAS_CEAP: list[tuple[str, str]] = [
+    (r"combust|gasolin|etanol|diesel", "COMBUST"),
+    (r"aeronave|avi[aã]o|jatinho", "FRETAMENTO DE AERONAVES"),
+    (r"embarca|lancha|barco", "FRETAMENTO DE EMBARCA"),
+    (r"terrestre|mar[ií]tim|fluvia|[oô]nibus", "PASSAGENS TERRESTRES"),
+    (r"passag|a[eé]re|voo|bilhete", "PASSAGEM"),
+    (r"divulg|publicid|propag|m[ií]dia|redes sociais", "DIVULG"),
+    (r"telefon|celular", "TELEFON"),
+    (r"escrit|aluguel de sala", "ESCRIT"),
+    (r"t[aá]xi|ped[aá]gio|estacion|uber", "ESTACIONAMENTO"),
+    (r"aliment|refei|restaur|comida", "ALIMENT"),
+    (r"hosped|hotel|pousada", "HOSPED"),
+    (r"ve[ií]cul|carro|fretamento|loca[cç][aã]o|aluguel", "FRETAMENTO DE VE"),
+    (r"segur", "SEGURAN"),
+    (r"moradia", "MORADIA"),
+    (r"postal|correio", "POSTAIS"),
+    (r"assinatura|publica[cç]|jornal|revista", "PUBLICA"),
+    (r"curso|palestra|evento", "CURSO"),
+    (r"token|certificado", "TOKENS"),
+]
+
+
+def sem_acento(texto: str) -> str:
+    return "".join(c for c in unicodedata.normalize("NFKD", texto) if not unicodedata.combining(c))
+
+
+def normalizar_categoria(texto: str | None) -> str | None:
+    """Converte um termo livre ('combustível', 'passagens aéreas', 'hotel') no radical canonico
+    usado nas categorias da CEAP. Sem correspondencia, devolve o texto em maiusculas sem acento."""
+    if not texto:
+        return None
+    t = texto.lower()
+    for padrao, radical in CATEGORIAS_CEAP:
+        if re.search(padrao, t):
+            return radical
+    return sem_acento(texto).upper().strip()
 
 
 # --------------------------------------------------------------------------- #
@@ -88,7 +132,9 @@ class ListarDespesasArgs(BaseModel):
     ano: int = Field(..., description="Ano das despesas, ex: 2025.")
     mes: int | None = Field(default=None, description="Mes (1-12). Omita para o ano inteiro.")
     categoria: str | None = Field(
-        default=None, description="Filtro por tipo de despesa (ex: 'COMBUSTÍVEIS', 'PASSAGEM AÉREA')."
+        default=None,
+        description="Filtro por tipo de despesa em linguagem natural (ex: 'combustível', 'passagem aérea', "
+        "'divulgação', 'hospedagem'); singular/plural e acentos sao normalizados.",
     )
 
 
@@ -117,7 +163,8 @@ def listar_despesas(id_deputado: int, ano: int, mes: int | None = None, categori
         if not any(link.get("rel") == "next" for link in dados.get("links", [])):
             break
     if categoria:
-        itens = [d for d in itens if categoria.lower() in d.get("tipoDespesa", "").lower()]
+        radical = normalizar_categoria(categoria)
+        itens = [d for d in itens if radical in sem_acento(d.get("tipoDespesa", "")).upper()]
     resumo = [
         {
             "data": d.get("dataDocumento"),

@@ -36,7 +36,7 @@ Repórteres que cobrem o Congresso precisam responder perguntas factuais sobre a
 ### Fase 4: ferramentas e RAG (notebook 04)
 - Text-to-SQL com guardrails (só SELECT, LIMIT forçado, auditoria impressa).
 - Índice FAISS carregado com `load_local` e exposto por `create_retriever_tool`.
-- Diagnóstico open-box (chunk_id, score L2) e query transformation. `[PENDENTE: scores reais antes/depois com embeddings da OpenAI]`
+- Diagnóstico open-box (chunk_id, score L2) e query transformation. Com `text-embedding-3-small`, a pergunta "A cota pode pagar hotel em Brasília?" não recupera o trecho sobre o Distrito Federal (top-3 com L2 0,915 a 0,943); reescrita para "A cota pode custear hospedagem no Distrito Federal?" traz o § 3º do art. 2º em primeiro (L2 0,894). A melhora é pequena em distância, mas muda o acerto do retriever.
 
 ### Fase 5: integrador, verificação, Streamlit, avaliação (notebook 05)
 - Agente único com cinco categorias de ferramenta.
@@ -73,7 +73,20 @@ Repórteres que cobrem o Congresso precisam responder perguntas factuais sobre a
 
 Avaliação local offline (modelo dummy + fixtures), seis casos: trajetória correta em 6/6; valor correto em 2/4 casos numéricos (as falhas são do mock: resultado SQL bruto e embeddings fake), juiz LLM não executado.
 
-`[PENDENTE: tabela da avaliação online com gpt-4o-mini no agente e gpt-4o como juiz; link e prints do experimento no LangSmith; discussão de onde o juiz discorda dos avaliadores determinísticos]`
+Avaliação local online (agente `gpt-4o-mini`, juiz `gpt-4o`, índice real), executada em 09/11/2026 no notebook 05:
+
+| caso | trajetória | valor | juiz |
+|---|---|---|---|
+| gasto_categoria_api (Tabata, combustível 2025) | 1 | 1 | 1 |
+| gasto_total_api (Nikolas 2025) | 1 | 1 | 1 |
+| media_partido_sql (PSB combustível) | 1 | 1 | 1 |
+| homonimos ("Silva") | 1 | — | 1 |
+| regra_rag (limite SP) | 1 | 1 | 1 |
+| fornecedor_api (CNPJ) | 1 | — | 1 |
+
+A primeira rodada online teve trajetória 5/6: no caso dos homônimos o agente respondeu de memória que "Silva" era ambíguo, sem chamar `buscar_deputado`, induzido pelo exemplo few-shot. A correção foi no prompt (regra "sempre chame a ferramenta antes de responder ou pedir esclarecimento"), e a rodada seguinte ficou em 6/6. A mesma rodada expôs um bug na chain paralela: o LLM extraía "combustível" (singular) e o filtro por substring não casava com "COMBUSTÍVEIS", devolvendo R$ 0,00 e média nula. A solução foi um normalizador de categoria (`src/tools.py`) usado pela ferramenta da API, pela chain SQL e pela verificação.
+
+`[PENDENTE: link e prints do experimento no LangSmith; discussão de onde o juiz discorda dos avaliadores determinísticos]`
 
 ## 6. Análise comparativa
 
@@ -84,11 +97,13 @@ Avaliação local offline (modelo dummy + fixtures), seis casos: trajetória cor
 - Memória episódica em RAM; persistir em FAISS/SQLite.
 - Índice só com o Ato da Mesa; incluir FAQ da cota e metadados por artigo.
 - Divergência API × CSV: criar ferramenta de reconciliação.
+- Rótulo da fonte: em uma execução online o agente atribuiu a média do partido (calculada no SQL) à "API da Câmara". O fact-check não pega erro de rótulo, só de valor; um verificador de fonte a partir da trajetória resolveria.
+- Ambiguidade de "limite": perguntado sobre o limite em SP após falar de combustível, o agente respondeu o sublimite de combustíveis (R$ 9.392,00, art. 3º, IX, redação do Ato 270/2023) em vez do teto mensal da UF (R$ 42.837,33). A resposta é correta pelo texto, mas não era a esperada; o prompt pode pedir que o agente apresente os dois quando houver sublimite.
 - Próxima disciplina (LangGraph): planejador, executor e verificador como nós, human-in-the-loop para homônimos.
 
 ## 8. Evidências de execução
 
-Notebooks executados em `notebooks/` (saídas gravadas), testes (`devbox run test`, 31 passando), logs de callback (notebook 02), conversa multi-turno (notebook 03). `[PENDENTE: prints do Streamlit e do LangSmith; link do vídeo]`
+Notebooks executados em `notebooks/` (saídas gravadas), testes (`devbox run test`, 33 passando), logs de callback (notebook 02), conversa multi-turno (notebook 03). `[PENDENTE: prints do Streamlit e do LangSmith; link do vídeo]`
 
 ## 9. Uso de IA generativa
 

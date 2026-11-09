@@ -69,8 +69,11 @@ COLUNAS_CSV = {
 # --------------------------------------------------------------------------- #
 # SQLite
 # --------------------------------------------------------------------------- #
-def construir_sqlite(csv: Path = config.CSV_CEAP, db: Path = config.SQLITE_CEAP) -> int:
+def construir_sqlite(csv: Path | None = None, db: Path | None = None) -> int:
     """Carrega o CSV da CEAP no SQLite. Retorna o número de linhas."""
+    # Caminhos resolvidos em tempo de chamada para respeitar config alterada (ex.: testes).
+    csv = csv or config.CSV_CEAP
+    db = db or config.SQLITE_CEAP
     # O arquivo oficial vem com BOM, separador ';' e decimal com ponto.
     df = pd.read_csv(csv, sep=";", encoding="utf-8-sig", low_memory=False, dtype=str)
     df = df[list(COLUNAS_CSV)].rename(columns=COLUNAS_CSV)
@@ -141,8 +144,10 @@ def _embeddings():
     return llm.embeddings()
 
 
-def construir_indice(texto_normas: Path = config.TEXTO_NORMAS, destino: Path = config.INDICE_ATO_MESA) -> int:
+def construir_indice(texto_normas: Path | None = None, destino: Path | None = None) -> int:
     """Monta e salva o índice FAISS da base normativa. Retorna o número de chunks."""
+    texto_normas = texto_normas or config.TEXTO_NORMAS
+    destino = destino or config.INDICE_ATO_MESA
     texto = texto_normas.read_text(encoding="utf-8")
     doc = Document(page_content=texto, metadata={"fonte": "Ato da Mesa 43/2009 (consolidado)"})
     splitter = RecursiveCharacterTextSplitter(
@@ -156,8 +161,9 @@ def construir_indice(texto_normas: Path = config.TEXTO_NORMAS, destino: Path = c
     return len(chunks)
 
 
-def carregar_indice(origem: Path = config.INDICE_ATO_MESA) -> FAISS:
+def carregar_indice(origem: Path | None = None) -> FAISS:
     """Carrega o índice FAISS existente (fase 4: não reconstruir)."""
+    origem = origem or config.INDICE_ATO_MESA
     return FAISS.load_local(str(origem), _embeddings(), allow_dangerous_deserialization=True)
 
 
