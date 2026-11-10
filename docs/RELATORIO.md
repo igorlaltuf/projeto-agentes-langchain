@@ -67,7 +67,7 @@ Repórteres que cobrem o Congresso precisam responder perguntas factuais sobre a
 | 5.3 | `src/agent.py` | **Equivalência:** `create_openai_tools_agent` + `AgentExecutor` → `create_agent` |
 | 5.4 | `src/agent.py`, `app.py` | **Equivalência:** `RunnableWithMessageHistory` → checkpointer por sessão |
 | 5.5 | `app.py` | opcional segundo o professor; implementado |
-| 5.6 | `src/evaluation.py`, notebook 05 | local + LangSmith `[PENDENTE]` |
+| 5.6 | `src/evaluation.py`, notebook 05 | local + LangSmith (dataset `apuracota-casos`, 6 experimentos, `comparar_experimentos`) |
 
 ## 5. Resultados de avaliação
 
@@ -86,11 +86,30 @@ Avaliação local online (agente `gpt-4o-mini`, juiz `gpt-4o`, índice real), ex
 
 A primeira rodada online teve trajetória 5/6: no caso dos homônimos o agente respondeu de memória que "Silva" era ambíguo, sem chamar `buscar_deputado`, induzido pelo exemplo few-shot. A correção foi no prompt (regra "sempre chame a ferramenta antes de responder ou pedir esclarecimento"), e a rodada seguinte ficou em 6/6. A mesma rodada expôs um bug na chain paralela: o LLM extraía "combustível" (singular) e o filtro por substring não casava com "COMBUSTÍVEIS", devolvendo R$ 0,00 e média nula. A solução foi um normalizador de categoria (`src/tools.py`) usado pela ferramenta da API, pela chain SQL e pela verificação.
 
-`[PENDENTE: link e prints do experimento no LangSmith; discussão de onde o juiz discorda dos avaliadores determinísticos]`
+**Registro no LangSmith** (10/11/2026). Dataset `apuracota-casos` (6 exemplos): https://smith.langchain.com/o/d018734c-9bf1-40b6-b0d7-2c3d5d46f8fe/datasets/6501d508-7202-4e3e-b210-a61d17218b18. Seis experimentos sobre o mesmo dataset, três configurações executadas duas vezes cada (rodada 1 por script, rodada 2 pelo notebook 05):
+
+| experimento | agente | traj. | valor | juiz | tokens | custo US$ | latência média |
+|---|---|---|---|---|---|---|---|
+| apuracota-ec4abd9d | gpt-4o-mini | 1,00 | 1,00 | 1,0 | 31.653 | 0,0027 | 3,4 s |
+| apuracota-3ed9aadd | gpt-4o-mini | 1,00 | 1,00 | 1,0 | 31.688 | 0,0029 | 4,4 s |
+| apuracota-dummy-10b005df | dummy offline | 0,83 | 0,75 | — | 0 | 0 | 0,0 s |
+| apuracota-dummy-c29e1208 | dummy offline | 1,00 | 0,75 | — | 0 | 0 | 0,0 s |
+| apuracota-gpt4o-8864075c | gpt-4o | 0,83 | 0,50 | 1,0 | 29.630 | 0,0597 | 2,6 s |
+| apuracota-gpt4o-ff8ccc17 | gpt-4o | 0,83 | 1,00 | 1,0 | 29.632 | 0,0522 | 2,1 s |
+
+A tabela é gerada por `comparar_experimentos()` (`src/evaluation.py`), que lê notas, tokens, custo e latência dos traces; os links de cada experimento estão na saída do notebook 05. Traces de uso (notebooks e Streamlit) ficam no projeto `apuracota` do LangSmith.
+
+**Onde o juiz discorda dos avaliadores determinísticos.** Nos dois experimentos com gpt-4o, o juiz deu 1,0 ao caso dos homônimos enquanto a trajetória deu 0: o modelo perguntou "qual Silva?" sem chamar `buscar_deputado`, apesar da regra explícita no prompt. O juiz avalia a resposta final (pedir esclarecimento é adequado); a trajetória cobra que a ambiguidade tenha sido verificada na fonte, que é o comportamento exigido de um agente de apuração. Na rodada 1 do gpt-4o, o juiz também deu 1,0 a respostas com "R$ 48,808.83" (formato en-US) que o avaliador de valor rejeitou; o avaliador foi corrigido para julgar o número e não o formato, e o formato passou a ser responsabilidade do juiz. O dummy erra o valor no caso de regra porque os embeddings fake não recuperam o trecho certo do Ato, limitação esperada do modo offline.
 
 ## 6. Análise comparativa
 
-`[PENDENTE: comparar as duas rodadas (dummy vs OpenAI; opcionalmente gpt-4o-mini vs gpt-4o no agente) por trajetória, valor e custo/latência via LangSmith]`
+Três configurações, mesmas seis perguntas, mesmos avaliadores (tabela na seção 5):
+
+- **Dummy offline** é o piso: sem nenhum LLM, as ferramentas determinísticas e as regras do mock acertam trajetória em 6/6 (rodada 2) e valor em 3/4, a custo zero e latência nula. Isso mostra que parte da qualidade do agente vem do desenho das ferramentas e dos guardrails, não do modelo. Falha onde depende de semântica (RAG com embeddings fake) e na primeira rodada expôs um bug real de dimensão do índice, corrigido.
+- **gpt-4o-mini** é a configuração de produção: 6/6 nos três avaliadores nas duas rodadas, US$ 0,003 por rodada de seis casos, 3 a 4 s por caso. É o único que cumpriu a regra de verificar homônimos na fonte.
+- **gpt-4o** custa cerca de 20 vezes mais por caso (US$ 0,05 a 0,06 por rodada) e é um pouco mais rápido, mas não foi melhor: repetiu nas duas rodadas o atalho de responder sem chamar `buscar_deputado` e, na primeira, escreveu valores em formato en-US. Modelo mais capaz não significa mais obediente ao prompt; para este agente, a aderência à trajetória vale mais que fluência.
+
+Conclusão: manter gpt-4o-mini no agente e gpt-4o só como juiz, onde a capacidade extra é usada para julgar e não para decidir.
 
 ## 7. Limitações e melhorias
 
@@ -103,7 +122,7 @@ A primeira rodada online teve trajetória 5/6: no caso dos homônimos o agente r
 
 ## 8. Evidências de execução
 
-Notebooks executados em `notebooks/` (saídas gravadas), testes (`devbox run test`, 33 passando), logs de callback (notebook 02), conversa multi-turno (notebook 03). `[PENDENTE: prints do Streamlit e do LangSmith; link do vídeo]`
+Notebooks executados em `notebooks/` (saídas gravadas), testes (`devbox run test`, 37 passando), logs de callback (notebook 02), conversa multi-turno (notebook 03). Experimentos e traces no LangSmith (dataset: https://smith.langchain.com/o/d018734c-9bf1-40b6-b0d7-2c3d5d46f8fe/datasets/6501d508-7202-4e3e-b210-a61d17218b18). `[PENDENTE: prints do Streamlit e do LangSmith; link do vídeo]`
 
 ## 9. Uso de IA generativa
 

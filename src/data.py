@@ -144,11 +144,9 @@ def _embeddings():
     return llm.embeddings()
 
 
-def construir_indice(texto_normas: Path | None = None, destino: Path | None = None) -> int:
-    """Monta e salva o índice FAISS da base normativa. Retorna o número de chunks."""
-    texto_normas = texto_normas or config.TEXTO_NORMAS
-    destino = destino or config.INDICE_ATO_MESA
-    texto = texto_normas.read_text(encoding="utf-8")
+def _chunks(texto_normas: Path | None = None) -> list[Document]:
+    """Corta a base normativa em chunks de 500 caracteres (100 de sobreposicao) com chunk_id."""
+    texto = (texto_normas or config.TEXTO_NORMAS).read_text(encoding="utf-8")
     doc = Document(page_content=texto, metadata={"fonte": "Ato da Mesa 43/2009 (consolidado)"})
     splitter = RecursiveCharacterTextSplitter(
         chunk_size=500, chunk_overlap=100, separators=["\n\n", "\n", ". ", " ", ""]
@@ -156,15 +154,41 @@ def construir_indice(texto_normas: Path | None = None, destino: Path | None = No
     chunks = splitter.split_documents([doc])
     for i, c in enumerate(chunks):
         c.metadata["chunk_id"] = f"CHK_{i:03d}"
+    return chunks
+
+
+def construir_indice(texto_normas: Path | None = None, destino: Path | None = None) -> int:
+    """Monta e salva o índice FAISS da base normativa. Retorna o número de chunks."""
+    destino = destino or config.INDICE_ATO_MESA
+    chunks = _chunks(texto_normas)
     indice = FAISS.from_documents(chunks, _embeddings())
     indice.save_local(str(destino))
     return len(chunks)
 
 
 def carregar_indice(origem: Path | None = None) -> FAISS:
-    """Carrega o índice FAISS existente (fase 4: não reconstruir)."""
+    """Carrega o índice FAISS existente (fase 4: não reconstruir).
+
+    O indice salvo tem a dimensao do modelo de embeddings que o gerou (1536 na OpenAI). Em modo
+    offline os embeddings fake tem outra dimensao; nesse caso o indice e refeito em memoria a partir
+    do mesmo texto (105 chunks, instantaneo), sem alterar o arquivo salvo. Online, a divergencia e
+    erro de configuracao e pede 'devbox run index'.
+    """
     origem = origem or config.INDICE_ATO_MESA
-    return FAISS.load_local(str(origem), _embeddings(), allow_dangerous_deserialization=True)
+    emb = _embeddings()
+    indice = FAISS.load_local(str(origem), emb, allow_dangerous_deserialization=True)
+    dim_consulta = len(emb.embed_query("dimensao"))
+    if indice.index.d == dim_consulta:
+        return indice
+    if llm.offline():
+        print(
+            f"[INDICE] salvo com {indice.index.d} dims, embeddings offline com {dim_consulta}: refazendo em memoria"
+        )
+        return FAISS.from_documents(_chunks(), emb)
+    raise RuntimeError(
+        f"Indice em {origem} tem {indice.index.d} dimensoes, mas {config.MODELO_EMBEDDINGS} produz "
+        f"{dim_consulta}. Reconstrua com: devbox run index"
+    )
 
 
 def ferramenta_regras_cota(k: int = 3):

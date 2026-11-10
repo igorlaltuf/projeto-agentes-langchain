@@ -66,7 +66,24 @@ CASOS_TESTE: list[dict[str, Any]] = [
 
 
 def _valores_brl(texto: str) -> list[float]:
-    return [float(v.replace(".", "").replace(",", ".")) for v in re.findall(r"R\$ ?([\d.]+,\d{2})", texto)]
+    """Extrai valores apos 'R$' aceitando 48.808,83 (pt-BR), 48,808.83 (en-US) e 48808.83.
+
+    O avaliador de valor julga o numero, nao o formato; o formato e cobrado pelo juiz LLM.
+    """
+    valores = []
+    for bruto in re.findall(r"R\$ ?(\d[\d.,]*)", texto):
+        v = bruto.rstrip(".,")
+        if "," in v and "." in v:
+            v = v.replace(".", "").replace(",", ".") if v.rfind(",") > v.rfind(".") else v.replace(",", "")
+        elif "," in v:
+            v = v.replace(",", ".") if re.search(r",\d{1,2}$", v) else v.replace(",", "")
+        elif v.count(".") > 1 or re.search(r"\.\d{3}$", v):
+            v = v.replace(".", "")
+        try:
+            valores.append(float(v))
+        except ValueError:
+            continue
+    return valores
 
 
 # --------------------------------------------------------------------------- #
@@ -171,6 +188,43 @@ def enviar_dataset_langsmith(nome: str = "apuracota-casos"):
             dataset_id=dataset.id,
         )
     return dataset
+
+
+def comparar_experimentos(nome_dataset: str = "apuracota-casos") -> list[dict]:
+    """Le no LangSmith todos os experimentos do dataset e resume notas, tokens, custo e latencia."""
+    from langsmith import Client
+
+    client = Client()
+    dataset = next(client.list_datasets(dataset_name=nome_dataset))
+    linhas = []
+    for proj in sorted(client.list_projects(reference_dataset_id=dataset.id), key=lambda p: p.start_time):
+        meta = (proj.extra or {}).get("metadata", {})
+        runs = list(client.list_runs(project_id=proj.id, is_root=True))
+        notas: dict[str, list[float]] = {}
+        tokens = custo = 0.0
+        latencias = []
+        for r in runs:
+            for f in client.list_feedback(run_ids=[r.id]):
+                if f.score is not None:
+                    notas.setdefault(f.key, []).append(float(f.score))
+            tokens += r.total_tokens or 0
+            custo += float(r.total_cost or 0)
+            if r.end_time:
+                latencias.append((r.end_time - r.start_time).total_seconds())
+        linha = {
+            "experimento": proj.name,
+            "modelo": "dummy (offline)" if meta.get("offline") else meta.get("modelo"),
+            "casos": len(runs),
+            "erros": sum(1 for r in runs if r.error),
+            "tokens": int(tokens),
+            "custo_usd": round(custo, 4),
+            "latencia_media_s": round(sum(latencias) / len(latencias), 1) if latencias else None,
+            "url": proj.url,
+        }
+        for chave in ("trajetoria_correta", "valor_correto", "juiz_llm"):
+            linha[chave] = round(sum(notas[chave]) / len(notas[chave]), 2) if notas.get(chave) else None
+        linhas.append(linha)
+    return linhas
 
 
 def avaliar_no_langsmith(nome_dataset: str = "apuracota-casos", prefixo: str = "apuracota"):

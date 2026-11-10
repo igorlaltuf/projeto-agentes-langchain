@@ -12,10 +12,10 @@ Um agente conversacional para repórteres que responde perguntas sobre a Cota pa
 | 2 | Agente ReAct, ferramentas (API da Câmara, SQL, hardcoded, semântica), roteamento, prompt PTCF, confiabilidade | ✅ online |
 | 3 | Memória CoALA, chatbot multi-turno, NLU (intenção e entidades) | ✅ online |
 | 4 | Text-to-query, retriever sobre índice FAISS salvo, diagnóstico de falha de recuperação | ✅ online |
-| 5 | Verificação factual + NLI, agente integrador, Streamlit, avaliação local e no LangSmith | ✅ online · ⏳ LangSmith |
+| 5 | Verificação factual + NLI, agente integrador, Streamlit, avaliação local e no LangSmith | ✅ online |
 | — | Relatório PDF, vídeo, entrega no Moodle (13/11/2026) | ⬜ |
 
-"✅ online" significa que o código está implementado, testado (`devbox run test`, 33 testes, modo offline) e os notebooks foram executados com `gpt-4o-mini` no agente, `gpt-4o` como juiz e índice FAISS real (`text-embedding-3-small`). Avaliação local online: 6/6 em trajetória, valor e juiz. Falta registrar o experimento no LangSmith (`LANGCHAIN_API_KEY`).
+"✅ online" significa que o código está implementado, testado (`devbox run test`, 37 testes, modo offline) e os notebooks foram executados com `gpt-4o-mini` no agente, `gpt-4o` como juiz e índice FAISS real (`text-embedding-3-small`). Avaliação local online: 6/6 em trajetória, valor e juiz. No LangSmith: dataset `apuracota-casos` com seis experimentos (gpt-4o-mini, dummy offline e gpt-4o, duas rodadas cada), comparados por `comparar_experimentos()` no notebook 05.
 
 O plano detalhado, fase a fase e rubrica a rubrica, está em [`docs/PLANO_DE_IMPLEMENTACAO.md`](docs/PLANO_DE_IMPLEMENTACAO.md). O enunciado oficial está em [`docs/ENUNCIADO_E_RUBRICAS.md`](docs/ENUNCIADO_E_RUBRICAS.md).
 

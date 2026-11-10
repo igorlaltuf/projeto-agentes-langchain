@@ -29,6 +29,18 @@ def test_agregacao_por_categoria():
     assert "48808.83" in saida
 
 
+def test_indice_com_outra_dimensao_e_refeito_em_memoria_no_modo_offline(tmp_path):
+    """Indice salvo por embeddings reais (outra dimensao) nao pode quebrar o modo offline."""
+    from langchain_community.vectorstores import FAISS
+    from langchain_core.embeddings import DeterministicFakeEmbedding
+
+    from src.data import _chunks
+
+    FAISS.from_documents(_chunks(), DeterministicFakeEmbedding(size=64)).save_local(str(tmp_path / "idx"))
+    indice = carregar_indice(tmp_path / "idx")
+    assert indice.similarity_search("limite mensal", k=1)
+
+
 def test_indice_carrega_e_retriever_responde():
     indice = carregar_indice()
     docs = indice.similarity_search("limite mensal da cota por UF", k=2)
