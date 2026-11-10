@@ -42,7 +42,7 @@ Repórteres que cobrem o Congresso precisam responder perguntas factuais sobre a
 - Agente único com cinco categorias de ferramenta.
 - Verificação em três etapas dentro do turno: extração de claims → fact-check determinístico contra o SQLite (consultas derivadas da trajetória) → NLI.
 - Streamlit com trajetória e painel de verificação. `[PENDENTE: print da interface]`
-- Avaliação com três avaliadores (trajetória, valor, juiz LLM), local e no LangSmith. `[PENDENTE: prints e números do LangSmith]`
+- Avaliação com três avaliadores (trajetória, valor, juiz LLM), local e no LangSmith. Números e links na seção 5. `[PENDENTE: print do experimento no LangSmith]`
 
 ## 4. Mapa das 29 rubricas
 
