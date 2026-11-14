@@ -1,0 +1,384 @@
+{
+  "executado_em": "2026-11-13T23:40:17.725170+00:00",
+  "suite_completa": {
+    "total": 214,
+    "aprovados": 214,
+    "falhas": 0
+  },
+  "testes_focados": [
+    {
+      "modulo": "tests.test_core_scope",
+      "teste": "test_nucleo_nao_consulta_fontes_ampliadas[Quais bens declarados ao TSE em 2022?]",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_core_scope",
+      "teste": "test_nucleo_nao_consulta_fontes_ampliadas[Quanto em emendas em 2026?]",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_core_scope",
+      "teste": "test_muda_ano_preserva_deputado_categoria",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_core_scope",
+      "teste": "test_fornecedores_preservam_recorte",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_core_scope",
+      "teste": "test_cnpj_explicito_preservado_para_sancoes",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_core_scope",
+      "teste": "test_autorizacao_subconsulta_metadados_sem_liberar_tabelas",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_core_scope",
+      "teste": "test_cobertura_por_fonte_em_periodos_distintos",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_core_scope",
+      "teste": "test_rag_recupera_excecao_hospedagem",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_core_scope",
+      "teste": "test_cadastro_indisponivel_nao_interrompe",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_core_scope",
+      "teste": "test_cadastro_nao_atribui_outro_cnpj",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_core_scope",
+      "teste": "test_rag_preserva_uf_curta_na_busca_de_limite",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_external",
+      "teste": "test_sancoes_locais_sem_rede_ou_chave",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_external",
+      "teste": "test_ambas_cargas_obrigatorias",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_external",
+      "teste": "test_sem_banco_nao_e_ausencia",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_external",
+      "teste": "test_cnpj_invalido_nao_consulta[***222333000181]",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_external",
+      "teste": "test_cnpj_invalido_nao_consulta[11222333000180]",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_external",
+      "teste": "test_cnpj_invalido_nao_consulta[11111111111111]",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_external",
+      "teste": "test_cnpj_invalido_nao_consulta[123]",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_external",
+      "teste": "test_cnpj_invalido_nao_consulta[]",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_external",
+      "teste": "test_sem_sancao_limitado_a_versao",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_external",
+      "teste": "test_reimportacao_idempotente",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_external",
+      "teste": "test_falha_preserva_snapshot[CADASTRO-CNEP]",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_external",
+      "teste": "test_falha_preserva_snapshot[DATA IN\\xcdCIO SAN\\xc7\\xc3O-32/13/2026]",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_external",
+      "teste": "test_falha_preserva_snapshot[C\\xd3DIGO DA SAN\\xc7\\xc3O-]",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_external",
+      "teste": "test_documento_mascarado_preservado_sem_associacao",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_external",
+      "teste": "test_codigo_duplicado_nao_publica",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_external",
+      "teste": "test_extracao_apenas_cadastro",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_external",
+      "teste": "test_download_datado_cache_e_404",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_external",
+      "teste": "test_erro_rede_nao_reutiliza_como_atual",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_investigation_flow",
+      "teste": "test_nomes_iguais_cnpjs_distintos_nao_sao_somados",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_investigation_flow",
+      "teste": "test_evolucao_estorno_e_ausencia_de_lancamento",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_investigation_flow",
+      "teste": "test_categorias_preservam_identidade",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_investigation_flow",
+      "teste": "test_concentracao_denominador_inclui_pessoas_fisicas",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_investigation_flow",
+      "teste": "test_outros_deputados_mesmo_cnpj",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_investigation_flow",
+      "teste": "test_participacao_na_ceap_nao_faturamento",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_investigation_flow",
+      "teste": "test_categoria_preservada_nos_dois_lados",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_investigation_flow",
+      "teste": "test_denominador_zero_nao_vira_percentual",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_investigation_flow",
+      "teste": "test_documento_parcial_cpf_ou_invalido_nao_cruza[***222333000181]",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_investigation_flow",
+      "teste": "test_documento_parcial_cpf_ou_invalido_nao_cruza[52998224725]",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_investigation_flow",
+      "teste": "test_documento_parcial_cpf_ou_invalido_nao_cruza[11222333000180]",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_investigation_flow",
+      "teste": "test_ano_nao_carregado_nao_vira_zero",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_investigation_flow",
+      "teste": "test_troca_periodo_refaz_ranking_e_exige_escolha",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_investigation_flow",
+      "teste": "test_periodo_ausente_pede_esclarecimento",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_investigation_flow",
+      "teste": "test_escolha_cadastro_socios_e_indisponibilidade",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_investigation_flow",
+      "teste": "test_nao_inventa_conclusoes[Isso prova favorecimento ou corrup\\xe7\\xe3o?-n\\xe3o provam]",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_investigation_flow",
+      "teste": "test_nao_inventa_conclusoes[Esse percentual representa faturamento?-n\\xe3o tem o faturamento total]",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_investigation_flow",
+      "teste": "test_agora_so_2025_continua_ranking",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_investigation_flow",
+      "teste": "test_id_e_nome_incompativeis_nao_consultam",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_investigation_flow",
+      "teste": "test_lista_de_outros_deputados_limitada_e_sinalizada",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_investigation_flow",
+      "teste": "test_ano_apos_sancoes_nao_inventa_historico",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_investigation_flow",
+      "teste": "test_ambiguidade_novo_deputado_nao_reutiliza_anterior",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_investigation_flow",
+      "teste": "test_quantidade_de_fornecedores_e_respeitada",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_investigation_flow",
+      "teste": "test_matriz_e_filial_nao_sao_mesmo_estabelecimento",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_investigation_flow",
+      "teste": "test_snapshot_atual_nao_certifica_sancao_passada",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_investigation_flow",
+      "teste": "test_checagem_reexecuta_e_nao_confirma_texto_alterado",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_investigation_flow",
+      "teste": "test_dois_cnpjs_explicitos_nao_escolhe_um_arbitrariamente",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_investigation_flow",
+      "teste": "test_detalhamento_grande_nao_e_apresentado_como_completo",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_investigation_flow",
+      "teste": "test_esclarecimento_de_periodo_mantem_pergunta_original",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_investigation_flow",
+      "teste": "test_quadro_atual_nao_vira_historico_societario",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_suppliers",
+      "teste": "test_documento_recuperado_por_nome_exato_unico",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_suppliers",
+      "teste": "test_socios_usa_cnpj_do_ranking_e_preserva_mascara",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_suppliers",
+      "teste": "test_varias_empresas_pede_escolha",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_suppliers",
+      "teste": "test_nome_com_documentos_distintos_nao_inventa",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_suppliers",
+      "teste": "test_indisponibilidade_nao_diz_ausencia_socios",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_suppliers",
+      "teste": "test_resposta_outro_cnpj_nao_atribui_socios",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_suppliers",
+      "teste": "test_qsa_ausente_diferente_de_vazio[None-False]",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_suppliers",
+      "teste": "test_qsa_ausente_diferente_de_vazio[qsa1-True]",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_suppliers",
+      "teste": "test_sql_periodo_informado_exige_filtro_compativel",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_suppliers",
+      "teste": "test_agregado_sem_periodo_nao_publica_total",
+      "status": "PASSOU"
+    },
+    {
+      "modulo": "tests.test_suppliers",
+      "teste": "test_cadastro_antigo_de_outra_empresa_nao_substitui_ranking",
+      "status": "PASSOU"
+    }
+  ],
+  "grupos_verificados": [
+    "Empresas com nomes iguais e CNPJs diferentes",
+    "Matriz e filial mantidas como estabelecimentos distintos",
+    "Documento inválido, CPF ou máscara não usados como CNPJ",
+    "Período ausente, esclarecimento e troca de ano",
+    "Troca para deputado ambíguo sem reutilizar a identidade anterior",
+    "Vários fornecedores exigem seleção antes de cadastro/sócios",
+    "Cadastro de outra empresa rejeitado; seleção preservada",
+    "QSA ausente, vazio, indisponível e limites históricos",
+    "Denominadores, percentuais e estornos conferidos com valores conhecidos",
+    "Denominador zero e listas limitadas sinalizados",
+    "CEIS/CNEP ausentes não equivalem a ausência de sanções",
+    "Snapshot atual não certifica sanção na data do gasto",
+    "Participação na CEAP não tratada como faturamento",
+    "Cruzamentos não tratados como prova de corrupção",
+    "Resposta financeira alterada não confirmada"
+  ],
+  "limites": [
+    "Dados artificiais nos cenários controlados não são fatos sobre empresas reais.",
+    "O fluxo de 14 etapas usa CEAP e sanções reais carregadas; o cadastro é uma resposta gravada da BrasilAPI.",
+    "Não mede comportamento livre do LLM online; tentativa registrada como ConnectError."
+  ],
+  "investigacao_completa": "entregaveis/investigacao-completa.json",
+  "online": "entregaveis/investigacao-completa-online.json"
+}

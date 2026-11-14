@@ -1,0 +1,18 @@
+{
+ "_url": "https://dadosabertos.camara.leg.br/api/v2/deputados/204554/despesas",
+ "_params": {
+  "idLegislatura": 57,
+  "ano": 2026,
+  "itens": 100,
+  "ordem": "ASC",
+  "ordenarPor": "dataDocumento",
+  "pagina": 1
+ },
+ "dados": [],
+ "links": [
+  {
+   "rel": "self",
+   "href": "https://dadosabertos.camara.leg.br/api/v2/deputados/204554/despesas?idLegislatura=57&ano=2026&itens=100&ordem=ASC&ordenarPor=dataDocumento&pagina=1"
+  }
+ ]
+}

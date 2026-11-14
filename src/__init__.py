@@ -1,1 +1,1 @@
-"""ApuraCota: agente de apuração de gastos parlamentares (CEAP)."""
+"""ApuraMandato: agente de apuração de gastos parlamentares (CEAP)."""

@@ -1,0 +1,1452 @@
+{
+  "executado_em": "2026-11-13T23:34:40.012979+00:00",
+  "banco": "/home/laltuf/Infnet/projeto-agentes-langchain/data/ceap.db",
+  "modo": "roteirizado offline",
+  "limites": "Banco CEAP real; cadastro offline é fixture. LLM/HTTP real e fontes ausentes não recebem aprovação simulada.",
+  "casos": [
+    {
+      "caso": "ranking",
+      "pergunta": "Quais foram os dez maiores fornecedores da Tabata Amaral entre 2024 e 2026?",
+      "status": "PASSOU",
+      "resposta": "**Tabata Amaral — 2024 até 2026**\n\n- SJR IMOVEIS LTDA — CNPJ 33927528000160: R$ 263.511,20\n\n- FAROL CONSULTORIA EM PUBLICIDADE LTDA — CNPJ 29813266000135: R$ 103.000,00\n\n- HUEVOS PRODUCAO E ASSESSORIA LTDA — CNPJ 10951191000120: R$ 99.333,55\n\n- ASHLLEY KAROLYNE SANTANA DE MELO — CNPJ 62570543000100: R$ 88.400,00\n\n- ASHLLEY KAROLYNE SANTANA DE MELO — CNPJ 32731094000165: R$ 61.400,00\n\n- REBECA AGUIS COSTA — CNPJ 39546671000198: R$ 59.010,00\n\n- LFMB SERVIÇOS DE COMUNICAÇÃO LTDA — CNPJ 56935958000129: R$ 53.205,00\n\n- EMVIC TECNOLOGIAS APLICADAS LTDA — CNPJ 46795949000126: R$ 36.199,20\n\n- Guilherme Melles - ME — CNPJ 15001503000159: R$ 35.000,00\n\n- DWS Comunicação LTDA — CNPJ 42864019000126: R$ 31.000,00\n\nRecorte de empresas com CNPJ completo válido; valores líquidos incluem estornos.\n\nFonte: Cota para o Exercício da Atividade Parlamentar (CEAP), 2024 até 2026.\n\nO ano de 2026 é parcial.",
+      "decisoes": [
+        {
+          "tipo": "decisao",
+          "ferramenta": "investigar_fornecedores",
+          "args": {
+            "acao": "ranking_fornecedores",
+            "id_deputado": null,
+            "nome_deputado": "Tabata Amaral",
+            "anos": [
+              2024,
+              2025,
+              2026
+            ],
+            "cnpjs": [],
+            "limite": 10,
+            "top_n": 10,
+            "categoria": null
+          },
+          "id": "investigacao_fornecedores_04cdd06c-a5a8-4fd9-bad8-f6e32f9bf739"
+        }
+      ],
+      "retornos": [
+        {
+          "status": "CONSULTADO",
+          "acao": "ranking_fornecedores",
+          "id_deputado": 204534,
+          "deputado": "Tabata Amaral",
+          "anos": [
+            2024,
+            2025,
+            2026
+          ],
+          "limite": 10,
+          "ranking": [
+            {
+              "cnpj": "33927528000160",
+              "fornecedor": "SJR IMOVEIS LTDA",
+              "valor": 263511.2,
+              "valor_centavos": 26351120,
+              "registros": 20
+            },
+            {
+              "cnpj": "29813266000135",
+              "fornecedor": "FAROL CONSULTORIA EM PUBLICIDADE LTDA",
+              "valor": 103000.0,
+              "valor_centavos": 10300000,
+              "registros": 15
+            },
+            {
+              "cnpj": "10951191000120",
+              "fornecedor": "HUEVOS PRODUCAO E ASSESSORIA LTDA",
+              "valor": 99333.55,
+              "valor_centavos": 9933355,
+              "registros": 12
+            },
+            {
+              "cnpj": "62570543000100",
+              "fornecedor": "ASHLLEY KAROLYNE SANTANA DE MELO",
+              "valor": 88400.0,
+              "valor_centavos": 8840000,
+              "registros": 11
+            },
+            {
+              "cnpj": "32731094000165",
+              "fornecedor": "ASHLLEY KAROLYNE SANTANA DE MELO",
+              "valor": 61400.0,
+              "valor_centavos": 6140000,
+              "registros": 6
+            },
+            {
+              "cnpj": "39546671000198",
+              "fornecedor": "REBECA AGUIS COSTA",
+              "valor": 59010.0,
+              "valor_centavos": 5901000,
+              "registros": 15
+            },
+            {
+              "cnpj": "56935958000129",
+              "fornecedor": "LFMB SERVIÇOS DE COMUNICAÇÃO LTDA",
+              "valor": 53205.0,
+              "valor_centavos": 5320500,
+              "registros": 2
+            },
+            {
+              "cnpj": "46795949000126",
+              "fornecedor": "EMVIC TECNOLOGIAS APLICADAS LTDA",
+              "valor": 36199.2,
+              "valor_centavos": 3619920,
+              "registros": 3
+            },
+            {
+              "cnpj": "15001503000159",
+              "fornecedor": "Guilherme Melles - ME",
+              "valor": 35000.0,
+              "valor_centavos": 3500000,
+              "registros": 3
+            },
+            {
+              "cnpj": "42864019000126",
+              "fornecedor": "DWS Comunicação LTDA",
+              "valor": 31000.0,
+              "valor_centavos": 3100000,
+              "registros": 15
+            }
+          ],
+          "selecionados": [],
+          "dados": [
+            {
+              "cnpj": "33927528000160",
+              "fornecedor": "SJR IMOVEIS LTDA",
+              "valor": 263511.2,
+              "valor_centavos": 26351120,
+              "registros": 20
+            },
+            {
+              "cnpj": "29813266000135",
+              "fornecedor": "FAROL CONSULTORIA EM PUBLICIDADE LTDA",
+              "valor": 103000.0,
+              "valor_centavos": 10300000,
+              "registros": 15
+            },
+            {
+              "cnpj": "10951191000120",
+              "fornecedor": "HUEVOS PRODUCAO E ASSESSORIA LTDA",
+              "valor": 99333.55,
+              "valor_centavos": 9933355,
+              "registros": 12
+            },
+            {
+              "cnpj": "62570543000100",
+              "fornecedor": "ASHLLEY KAROLYNE SANTANA DE MELO",
+              "valor": 88400.0,
+              "valor_centavos": 8840000,
+              "registros": 11
+            },
+            {
+              "cnpj": "32731094000165",
+              "fornecedor": "ASHLLEY KAROLYNE SANTANA DE MELO",
+              "valor": 61400.0,
+              "valor_centavos": 6140000,
+              "registros": 6
+            },
+            {
+              "cnpj": "39546671000198",
+              "fornecedor": "REBECA AGUIS COSTA",
+              "valor": 59010.0,
+              "valor_centavos": 5901000,
+              "registros": 15
+            },
+            {
+              "cnpj": "56935958000129",
+              "fornecedor": "LFMB SERVIÇOS DE COMUNICAÇÃO LTDA",
+              "valor": 53205.0,
+              "valor_centavos": 5320500,
+              "registros": 2
+            },
+            {
+              "cnpj": "46795949000126",
+              "fornecedor": "EMVIC TECNOLOGIAS APLICADAS LTDA",
+              "valor": 36199.2,
+              "valor_centavos": 3619920,
+              "registros": 3
+            },
+            {
+              "cnpj": "15001503000159",
+              "fornecedor": "Guilherme Melles - ME",
+              "valor": 35000.0,
+              "valor_centavos": 3500000,
+              "registros": 3
+            },
+            {
+              "cnpj": "42864019000126",
+              "fornecedor": "DWS Comunicação LTDA",
+              "valor": 31000.0,
+              "valor_centavos": 3100000,
+              "registros": 15
+            }
+          ],
+          "completo": true,
+          "total_outros_deputados": null,
+          "lista_limitada": false,
+          "referencias": {},
+          "categoria": null,
+          "fonte": "Cota para o Exercício da Atividade Parlamentar (CEAP)",
+          "ano_corrente_parcial": true,
+          "aviso": "Ranking de empresas com CNPJ completo válido. Os valores são líquidos, incluindo estornos. Não representa faturamento, prova de serviço ou irregularidade."
+        }
+      ],
+      "evidencias_textuais": [],
+      "segundos": 13.797
+    },
+    {
+      "caso": "anual",
+      "pergunta": "Quanto cada um dos três primeiros fornecedores recebeu por ano?",
+      "status": "PASSOU",
+      "resposta": "**Tabata Amaral — 2024 até 2026**\n\n- SJR IMOVEIS LTDA, 2024: nenhum lançamento nesse recorte.\n\n- SJR IMOVEIS LTDA — CNPJ 33927528000160, 2025: R$ 125.317,90\n\n- SJR IMOVEIS LTDA — CNPJ 33927528000160, 2026: R$ 138.193,30\n\n- FAROL CONSULTORIA EM PUBLICIDADE LTDA — CNPJ 29813266000135, 2024: R$ 79.000,00\n\n- FAROL CONSULTORIA EM PUBLICIDADE LTDA — CNPJ 29813266000135, 2025: R$ 24.000,00\n\n- FAROL CONSULTORIA EM PUBLICIDADE LTDA, 2026: nenhum lançamento nesse recorte.\n\n- HUEVOS PRODUCAO E ASSESSORIA LTDA, 2024: nenhum lançamento nesse recorte.\n\n- HUEVOS PRODUCAO E ASSESSORIA LTDA — CNPJ 10951191000120, 2025: R$ 94.333,55\n\n- HUEVOS PRODUCAO E ASSESSORIA LTDA — CNPJ 10951191000120, 2026: R$ 5.000,00\n\nEmpresas selecionadas: SJR IMOVEIS LTDA — CNPJ 33927528000160; FAROL CONSULTORIA EM PUBLICIDADE LTDA — CNPJ 29813266000135; HUEVOS PRODUCAO E ASSESSORIA LTDA — CNPJ 10951191000120\n\nRecorte de empresas com CNPJ completo válido; valores líquidos incluem estornos.\n\nFonte: Cota para o Exercício da Atividade Parlamentar (CEAP), 2024 até 2026.\n\nO ano de 2026 é parcial.",
+      "decisoes": [
+        {
+          "tipo": "decisao",
+          "ferramenta": "investigar_fornecedores",
+          "args": {
+            "acao": "evolucao_anual",
+            "id_deputado": 204534,
+            "nome_deputado": null,
+            "anos": [
+              2024,
+              2025,
+              2026
+            ],
+            "cnpjs": [
+              "33927528000160",
+              "29813266000135",
+              "10951191000120"
+            ],
+            "limite": 10,
+            "top_n": 3,
+            "categoria": null
+          },
+          "id": "investigacao_fornecedores_189ccbbc-30a7-4482-aeb6-202fe5739746"
+        }
+      ],
+      "retornos": [
+        {
+          "status": "CONSULTADO",
+          "acao": "evolucao_anual",
+          "id_deputado": 204534,
+          "deputado": "Tabata Amaral",
+          "anos": [
+            2024,
+            2025,
+            2026
+          ],
+          "limite": 10,
+          "ranking": [
+            {
+              "cnpj": "33927528000160",
+              "fornecedor": "SJR IMOVEIS LTDA",
+              "valor": 263511.2,
+              "valor_centavos": 26351120,
+              "registros": 20
+            },
+            {
+              "cnpj": "29813266000135",
+              "fornecedor": "FAROL CONSULTORIA EM PUBLICIDADE LTDA",
+              "valor": 103000.0,
+              "valor_centavos": 10300000,
+              "registros": 15
+            },
+            {
+              "cnpj": "10951191000120",
+              "fornecedor": "HUEVOS PRODUCAO E ASSESSORIA LTDA",
+              "valor": 99333.55,
+              "valor_centavos": 9933355,
+              "registros": 12
+            },
+            {
+              "cnpj": "62570543000100",
+              "fornecedor": "ASHLLEY KAROLYNE SANTANA DE MELO",
+              "valor": 88400.0,
+              "valor_centavos": 8840000,
+              "registros": 11
+            },
+            {
+              "cnpj": "32731094000165",
+              "fornecedor": "ASHLLEY KAROLYNE SANTANA DE MELO",
+              "valor": 61400.0,
+              "valor_centavos": 6140000,
+              "registros": 6
+            },
+            {
+              "cnpj": "39546671000198",
+              "fornecedor": "REBECA AGUIS COSTA",
+              "valor": 59010.0,
+              "valor_centavos": 5901000,
+              "registros": 15
+            },
+            {
+              "cnpj": "56935958000129",
+              "fornecedor": "LFMB SERVIÇOS DE COMUNICAÇÃO LTDA",
+              "valor": 53205.0,
+              "valor_centavos": 5320500,
+              "registros": 2
+            },
+            {
+              "cnpj": "46795949000126",
+              "fornecedor": "EMVIC TECNOLOGIAS APLICADAS LTDA",
+              "valor": 36199.2,
+              "valor_centavos": 3619920,
+              "registros": 3
+            },
+            {
+              "cnpj": "15001503000159",
+              "fornecedor": "Guilherme Melles - ME",
+              "valor": 35000.0,
+              "valor_centavos": 3500000,
+              "registros": 3
+            },
+            {
+              "cnpj": "42864019000126",
+              "fornecedor": "DWS Comunicação LTDA",
+              "valor": 31000.0,
+              "valor_centavos": 3100000,
+              "registros": 15
+            }
+          ],
+          "selecionados": [
+            {
+              "cnpj": "33927528000160",
+              "fornecedor": "SJR IMOVEIS LTDA"
+            },
+            {
+              "cnpj": "29813266000135",
+              "fornecedor": "FAROL CONSULTORIA EM PUBLICIDADE LTDA"
+            },
+            {
+              "cnpj": "10951191000120",
+              "fornecedor": "HUEVOS PRODUCAO E ASSESSORIA LTDA"
+            }
+          ],
+          "dados": [
+            {
+              "cnpj": "33927528000160",
+              "fornecedor": "SJR IMOVEIS LTDA",
+              "ano": 2024,
+              "valor": 0.0,
+              "registros": 0
+            },
+            {
+              "cnpj": "33927528000160",
+              "fornecedor": "SJR IMOVEIS LTDA",
+              "ano": 2025,
+              "valor": 125317.9,
+              "registros": 10
+            },
+            {
+              "cnpj": "33927528000160",
+              "fornecedor": "SJR IMOVEIS LTDA",
+              "ano": 2026,
+              "valor": 138193.3,
+              "registros": 10
+            },
+            {
+              "cnpj": "29813266000135",
+              "fornecedor": "FAROL CONSULTORIA EM PUBLICIDADE LTDA",
+              "ano": 2024,
+              "valor": 79000.0,
+              "registros": 7
+            },
+            {
+              "cnpj": "29813266000135",
+              "fornecedor": "FAROL CONSULTORIA EM PUBLICIDADE LTDA",
+              "ano": 2025,
+              "valor": 24000.0,
+              "registros": 8
+            },
+            {
+              "cnpj": "29813266000135",
+              "fornecedor": "FAROL CONSULTORIA EM PUBLICIDADE LTDA",
+              "ano": 2026,
+              "valor": 0.0,
+              "registros": 0
+            },
+            {
+              "cnpj": "10951191000120",
+              "fornecedor": "HUEVOS PRODUCAO E ASSESSORIA LTDA",
+              "ano": 2024,
+              "valor": 0.0,
+              "registros": 0
+            },
+            {
+              "cnpj": "10951191000120",
+              "fornecedor": "HUEVOS PRODUCAO E ASSESSORIA LTDA",
+              "ano": 2025,
+              "valor": 94333.55,
+              "registros": 10
+            },
+            {
+              "cnpj": "10951191000120",
+              "fornecedor": "HUEVOS PRODUCAO E ASSESSORIA LTDA",
+              "ano": 2026,
+              "valor": 5000.0,
+              "registros": 2
+            }
+          ],
+          "completo": true,
+          "total_outros_deputados": null,
+          "lista_limitada": false,
+          "referencias": {},
+          "categoria": null,
+          "fonte": "Cota para o Exercício da Atividade Parlamentar (CEAP)",
+          "ano_corrente_parcial": true,
+          "aviso": "Ranking de empresas com CNPJ completo válido. Os valores são líquidos, incluindo estornos. Não representa faturamento, prova de serviço ou irregularidade."
+        }
+      ],
+      "evidencias_textuais": [],
+      "segundos": 1.997
+    },
+    {
+      "caso": "categorias",
+      "pergunta": "Em quais categorias esses três fornecedores aparecem?",
+      "status": "PASSOU",
+      "resposta": "**Tabata Amaral — 2024 até 2026**\n\n- CNPJ 10951191000120 — DIVULGAÇÃO DA ATIVIDADE PARLAMENTAR.: R$ 99.333,55\n\n- CNPJ 29813266000135 — DIVULGAÇÃO DA ATIVIDADE PARLAMENTAR.: R$ 103.000,00\n\n- CNPJ 33927528000160 — MANUTENÇÃO DE ESCRITÓRIO DE APOIO À ATIVIDADE PARLAMENTAR: R$ 263.511,20\n\nEmpresas selecionadas: SJR IMOVEIS LTDA — CNPJ 33927528000160; FAROL CONSULTORIA EM PUBLICIDADE LTDA — CNPJ 29813266000135; HUEVOS PRODUCAO E ASSESSORIA LTDA — CNPJ 10951191000120\n\nRecorte de empresas com CNPJ completo válido; valores líquidos incluem estornos.\n\nFonte: Cota para o Exercício da Atividade Parlamentar (CEAP), 2024 até 2026.\n\nO ano de 2026 é parcial.",
+      "decisoes": [
+        {
+          "tipo": "decisao",
+          "ferramenta": "investigar_fornecedores",
+          "args": {
+            "acao": "categorias",
+            "id_deputado": 204534,
+            "nome_deputado": null,
+            "anos": [
+              2024,
+              2025,
+              2026
+            ],
+            "cnpjs": [
+              "33927528000160",
+              "29813266000135",
+              "10951191000120"
+            ],
+            "limite": 10,
+            "top_n": 3,
+            "categoria": null
+          },
+          "id": "investigacao_fornecedores_c16db5f7-ce20-4cbb-a3f9-8328f94b3cdf"
+        }
+      ],
+      "retornos": [
+        {
+          "status": "CONSULTADO",
+          "acao": "categorias",
+          "id_deputado": 204534,
+          "deputado": "Tabata Amaral",
+          "anos": [
+            2024,
+            2025,
+            2026
+          ],
+          "limite": 10,
+          "ranking": [
+            {
+              "cnpj": "33927528000160",
+              "fornecedor": "SJR IMOVEIS LTDA",
+              "valor": 263511.2,
+              "valor_centavos": 26351120,
+              "registros": 20
+            },
+            {
+              "cnpj": "29813266000135",
+              "fornecedor": "FAROL CONSULTORIA EM PUBLICIDADE LTDA",
+              "valor": 103000.0,
+              "valor_centavos": 10300000,
+              "registros": 15
+            },
+            {
+              "cnpj": "10951191000120",
+              "fornecedor": "HUEVOS PRODUCAO E ASSESSORIA LTDA",
+              "valor": 99333.55,
+              "valor_centavos": 9933355,
+              "registros": 12
+            },
+            {
+              "cnpj": "62570543000100",
+              "fornecedor": "ASHLLEY KAROLYNE SANTANA DE MELO",
+              "valor": 88400.0,
+              "valor_centavos": 8840000,
+              "registros": 11
+            },
+            {
+              "cnpj": "32731094000165",
+              "fornecedor": "ASHLLEY KAROLYNE SANTANA DE MELO",
+              "valor": 61400.0,
+              "valor_centavos": 6140000,
+              "registros": 6
+            },
+            {
+              "cnpj": "39546671000198",
+              "fornecedor": "REBECA AGUIS COSTA",
+              "valor": 59010.0,
+              "valor_centavos": 5901000,
+              "registros": 15
+            },
+            {
+              "cnpj": "56935958000129",
+              "fornecedor": "LFMB SERVIÇOS DE COMUNICAÇÃO LTDA",
+              "valor": 53205.0,
+              "valor_centavos": 5320500,
+              "registros": 2
+            },
+            {
+              "cnpj": "46795949000126",
+              "fornecedor": "EMVIC TECNOLOGIAS APLICADAS LTDA",
+              "valor": 36199.2,
+              "valor_centavos": 3619920,
+              "registros": 3
+            },
+            {
+              "cnpj": "15001503000159",
+              "fornecedor": "Guilherme Melles - ME",
+              "valor": 35000.0,
+              "valor_centavos": 3500000,
+              "registros": 3
+            },
+            {
+              "cnpj": "42864019000126",
+              "fornecedor": "DWS Comunicação LTDA",
+              "valor": 31000.0,
+              "valor_centavos": 3100000,
+              "registros": 15
+            }
+          ],
+          "selecionados": [
+            {
+              "cnpj": "33927528000160",
+              "fornecedor": "SJR IMOVEIS LTDA"
+            },
+            {
+              "cnpj": "29813266000135",
+              "fornecedor": "FAROL CONSULTORIA EM PUBLICIDADE LTDA"
+            },
+            {
+              "cnpj": "10951191000120",
+              "fornecedor": "HUEVOS PRODUCAO E ASSESSORIA LTDA"
+            }
+          ],
+          "dados": [
+            {
+              "cnpj": "10951191000120",
+              "categoria": "DIVULGAÇÃO DA ATIVIDADE PARLAMENTAR.",
+              "valor": 99333.55,
+              "registros": 12
+            },
+            {
+              "cnpj": "29813266000135",
+              "categoria": "DIVULGAÇÃO DA ATIVIDADE PARLAMENTAR.",
+              "valor": 103000.0,
+              "registros": 15
+            },
+            {
+              "cnpj": "33927528000160",
+              "categoria": "MANUTENÇÃO DE ESCRITÓRIO DE APOIO À ATIVIDADE PARLAMENTAR",
+              "valor": 263511.2,
+              "registros": 20
+            }
+          ],
+          "completo": true,
+          "total_outros_deputados": null,
+          "lista_limitada": false,
+          "referencias": {},
+          "categoria": null,
+          "fonte": "Cota para o Exercício da Atividade Parlamentar (CEAP)",
+          "ano_corrente_parcial": true,
+          "aviso": "Ranking de empresas com CNPJ completo válido. Os valores são líquidos, incluindo estornos. Não representa faturamento, prova de serviço ou irregularidade."
+        }
+      ],
+      "evidencias_textuais": [],
+      "segundos": 2.009
+    },
+    {
+      "caso": "concentracao",
+      "pergunta": "Qual percentual do gasto total dela foi destinado aos três maiores fornecedores?",
+      "status": "PASSOU",
+      "resposta": "**Tabata Amaral — 2024 até 2026**\n\nOs 3 maiores fornecedores somam R$ 465.844,75 de R$ 1.368.536,48 em despesas do deputado: 34,04%.\n\nEmpresas selecionadas: SJR IMOVEIS LTDA — CNPJ 33927528000160; FAROL CONSULTORIA EM PUBLICIDADE LTDA — CNPJ 29813266000135; HUEVOS PRODUCAO E ASSESSORIA LTDA — CNPJ 10951191000120\n\nRecorte de empresas com CNPJ completo válido; valores líquidos incluem estornos.\n\nFonte: Cota para o Exercício da Atividade Parlamentar (CEAP), 2024 até 2026.\n\nO ano de 2026 é parcial.",
+      "decisoes": [
+        {
+          "tipo": "decisao",
+          "ferramenta": "investigar_fornecedores",
+          "args": {
+            "acao": "concentracao",
+            "id_deputado": 204534,
+            "nome_deputado": null,
+            "anos": [
+              2024,
+              2025,
+              2026
+            ],
+            "cnpjs": [],
+            "limite": 10,
+            "top_n": 3,
+            "categoria": null
+          },
+          "id": "investigacao_fornecedores_d8f6449e-49ef-429f-9554-01e86c9f17b0"
+        }
+      ],
+      "retornos": [
+        {
+          "status": "CONSULTADO",
+          "acao": "concentracao",
+          "id_deputado": 204534,
+          "deputado": "Tabata Amaral",
+          "anos": [
+            2024,
+            2025,
+            2026
+          ],
+          "limite": 10,
+          "ranking": [
+            {
+              "cnpj": "33927528000160",
+              "fornecedor": "SJR IMOVEIS LTDA",
+              "valor": 263511.2,
+              "valor_centavos": 26351120,
+              "registros": 20
+            },
+            {
+              "cnpj": "29813266000135",
+              "fornecedor": "FAROL CONSULTORIA EM PUBLICIDADE LTDA",
+              "valor": 103000.0,
+              "valor_centavos": 10300000,
+              "registros": 15
+            },
+            {
+              "cnpj": "10951191000120",
+              "fornecedor": "HUEVOS PRODUCAO E ASSESSORIA LTDA",
+              "valor": 99333.55,
+              "valor_centavos": 9933355,
+              "registros": 12
+            },
+            {
+              "cnpj": "62570543000100",
+              "fornecedor": "ASHLLEY KAROLYNE SANTANA DE MELO",
+              "valor": 88400.0,
+              "valor_centavos": 8840000,
+              "registros": 11
+            },
+            {
+              "cnpj": "32731094000165",
+              "fornecedor": "ASHLLEY KAROLYNE SANTANA DE MELO",
+              "valor": 61400.0,
+              "valor_centavos": 6140000,
+              "registros": 6
+            },
+            {
+              "cnpj": "39546671000198",
+              "fornecedor": "REBECA AGUIS COSTA",
+              "valor": 59010.0,
+              "valor_centavos": 5901000,
+              "registros": 15
+            },
+            {
+              "cnpj": "56935958000129",
+              "fornecedor": "LFMB SERVIÇOS DE COMUNICAÇÃO LTDA",
+              "valor": 53205.0,
+              "valor_centavos": 5320500,
+              "registros": 2
+            },
+            {
+              "cnpj": "46795949000126",
+              "fornecedor": "EMVIC TECNOLOGIAS APLICADAS LTDA",
+              "valor": 36199.2,
+              "valor_centavos": 3619920,
+              "registros": 3
+            },
+            {
+              "cnpj": "15001503000159",
+              "fornecedor": "Guilherme Melles - ME",
+              "valor": 35000.0,
+              "valor_centavos": 3500000,
+              "registros": 3
+            },
+            {
+              "cnpj": "42864019000126",
+              "fornecedor": "DWS Comunicação LTDA",
+              "valor": 31000.0,
+              "valor_centavos": 3100000,
+              "registros": 15
+            }
+          ],
+          "selecionados": [
+            {
+              "cnpj": "33927528000160",
+              "fornecedor": "SJR IMOVEIS LTDA",
+              "valor": 263511.2,
+              "valor_centavos": 26351120
+            },
+            {
+              "cnpj": "29813266000135",
+              "fornecedor": "FAROL CONSULTORIA EM PUBLICIDADE LTDA",
+              "valor": 103000.0,
+              "valor_centavos": 10300000
+            },
+            {
+              "cnpj": "10951191000120",
+              "fornecedor": "HUEVOS PRODUCAO E ASSESSORIA LTDA",
+              "valor": 99333.55,
+              "valor_centavos": 9933355
+            }
+          ],
+          "dados": [
+            {
+              "top_n": 3,
+              "valor_top": 465844.75,
+              "gasto_total_deputado": 1368536.48,
+              "percentual": 34.04
+            }
+          ],
+          "completo": true,
+          "total_outros_deputados": null,
+          "lista_limitada": false,
+          "referencias": {
+            "numerador_centavos": 46584475,
+            "denominador_centavos": 136853648,
+            "universo_denominador": "Todas as despesas CEAP do deputado no mesmo período, incluindo pessoas físicas e estornos."
+          },
+          "categoria": null,
+          "fonte": "Cota para o Exercício da Atividade Parlamentar (CEAP)",
+          "ano_corrente_parcial": true,
+          "aviso": "Ranking de empresas com CNPJ completo válido. Os valores são líquidos, incluindo estornos. Não representa faturamento, prova de serviço ou irregularidade."
+        }
+      ],
+      "evidencias_textuais": [],
+      "segundos": 2.033
+    },
+    {
+      "caso": "cadastro",
+      "pergunta": "Consulte o cadastro do primeiro fornecedor.",
+      "status": "PASSOU",
+      "resposta": "Dados do fornecedor (Brasil API): {\"status\": \"CONSULTADO\", \"cnpj\": \"33927528000160\", \"razao_social\": \"SJR IMOVEIS LTDA\", \"situacao\": \"ATIVA\", \"cnae_principal\": \"Corretagem na compra e venda e avaliação de imóveis\", \"municipio\": \"SAO PAULO-SP\", \"abertura\": \"2019-06-14\", \"qsa_disponivel\": true, \"socios\": [{\"nome\": \"MONICA ROSANE FERNANDES PINHEIRO DE LIMA\", \"qualificacao\": \"Sócio-Administrador\", \"entrada\": \"2021-09-24\", \"documento\": \"***922078**\"}, {\"nome\": \"ROGER HILAOKI MACEDO NAGATANI\", \"qualificacao\": \"Sócio-Administrador\", \"entrada\": \"2025-03-18\", \"documento\": \"***017168**\"}], \"fonte\": \"BrasilAPI / Minha Receita\", \"consultado_em\": \"fixture gravada\"}",
+      "decisoes": [
+        {
+          "tipo": "decisao",
+          "ferramenta": "dados_fornecedor",
+          "args": {
+            "cnpj": "33927528000160"
+          },
+          "id": "call_offline_18"
+        }
+      ],
+      "retornos": [
+        {
+          "status": "CONSULTADO",
+          "cnpj": "33927528000160",
+          "razao_social": "SJR IMOVEIS LTDA",
+          "situacao": "ATIVA",
+          "cnae_principal": "Corretagem na compra e venda e avaliação de imóveis",
+          "municipio": "SAO PAULO-SP",
+          "abertura": "2019-06-14",
+          "qsa_disponivel": true,
+          "socios": [
+            {
+              "nome": "MONICA ROSANE FERNANDES PINHEIRO DE LIMA",
+              "qualificacao": "Sócio-Administrador",
+              "entrada": "2021-09-24",
+              "documento": "***922078**"
+            },
+            {
+              "nome": "ROGER HILAOKI MACEDO NAGATANI",
+              "qualificacao": "Sócio-Administrador",
+              "entrada": "2025-03-18",
+              "documento": "***017168**"
+            }
+          ],
+          "fonte": "BrasilAPI / Minha Receita",
+          "consultado_em": "fixture gravada"
+        }
+      ],
+      "evidencias_textuais": [],
+      "segundos": 0.019
+    },
+    {
+      "caso": "socios",
+      "pergunta": "Quem são os sócios?",
+      "status": "PASSOU",
+      "resposta": "**SJR IMOVEIS LTDA — CNPJ 33927528000160**\n\nQuadro de sócios e administradores da versão consultada:\n\n- MONICA ROSANE FERNANDES PINHEIRO DE LIMA — Sócio-Administrador; entrada: 2021-09-24; documento publicado: ***922078**\n\n- ROGER HILAOKI MACEDO NAGATANI — Sócio-Administrador; entrada: 2025-03-18; documento publicado: ***017168**\n\nFonte: Cadastro de CNPJ — BrasilAPI / Minha Receita. Consulta: fixture gravada.\n\nO cadastro consultado não comprova a composição societária na data de cada pagamento. Documentos mascarados não confirmam identidade pessoal.",
+      "decisoes": [
+        {
+          "tipo": "decisao",
+          "ferramenta": "dados_fornecedor",
+          "args": {
+            "cnpj": "33927528000160"
+          },
+          "id": "socios_confirmados_c080eac5-13ee-441c-9467-3574fa428197"
+        }
+      ],
+      "retornos": [
+        {
+          "status": "CONSULTADO",
+          "cnpj": "33927528000160",
+          "razao_social": "SJR IMOVEIS LTDA",
+          "situacao": "ATIVA",
+          "cnae_principal": "Corretagem na compra e venda e avaliação de imóveis",
+          "municipio": "SAO PAULO-SP",
+          "abertura": "2019-06-14",
+          "qsa_disponivel": true,
+          "socios": [
+            {
+              "nome": "MONICA ROSANE FERNANDES PINHEIRO DE LIMA",
+              "qualificacao": "Sócio-Administrador",
+              "entrada": "2021-09-24",
+              "documento": "***922078**"
+            },
+            {
+              "nome": "ROGER HILAOKI MACEDO NAGATANI",
+              "qualificacao": "Sócio-Administrador",
+              "entrada": "2025-03-18",
+              "documento": "***017168**"
+            }
+          ],
+          "fonte": "BrasilAPI / Minha Receita",
+          "consultado_em": "fixture gravada"
+        }
+      ],
+      "evidencias_textuais": [],
+      "segundos": 0.014
+    },
+    {
+      "caso": "outros",
+      "pergunta": "Esse mesmo CNPJ também recebeu por despesas de outros deputados nesse período? Quais e quanto?",
+      "status": "PASSOU",
+      "resposta": "**Tabata Amaral — 2024 até 2026**\n\nNenhum lançamento encontrado nesse cruzamento e período; a conclusão é limitada à CEAP carregada.\n\nEmpresas selecionadas: SJR IMOVEIS LTDA — CNPJ 33927528000160\n\nRecorte de empresas com CNPJ completo válido; valores líquidos incluem estornos.\n\nFonte: Cota para o Exercício da Atividade Parlamentar (CEAP), 2024 até 2026.\n\nO ano de 2026 é parcial.",
+      "decisoes": [
+        {
+          "tipo": "decisao",
+          "ferramenta": "investigar_fornecedores",
+          "args": {
+            "acao": "outros_deputados",
+            "id_deputado": 204534,
+            "nome_deputado": null,
+            "anos": [
+              2024,
+              2025,
+              2026
+            ],
+            "cnpjs": [
+              "33927528000160"
+            ],
+            "limite": 10,
+            "top_n": 3,
+            "categoria": null
+          },
+          "id": "investigacao_fornecedores_a22c5999-f626-45c4-b8e0-7c6a83d3233a"
+        }
+      ],
+      "retornos": [
+        {
+          "status": "CONSULTADO",
+          "acao": "outros_deputados",
+          "id_deputado": 204534,
+          "deputado": "Tabata Amaral",
+          "anos": [
+            2024,
+            2025,
+            2026
+          ],
+          "limite": 10,
+          "ranking": [
+            {
+              "cnpj": "33927528000160",
+              "fornecedor": "SJR IMOVEIS LTDA",
+              "valor": 263511.2,
+              "valor_centavos": 26351120,
+              "registros": 20
+            },
+            {
+              "cnpj": "29813266000135",
+              "fornecedor": "FAROL CONSULTORIA EM PUBLICIDADE LTDA",
+              "valor": 103000.0,
+              "valor_centavos": 10300000,
+              "registros": 15
+            },
+            {
+              "cnpj": "10951191000120",
+              "fornecedor": "HUEVOS PRODUCAO E ASSESSORIA LTDA",
+              "valor": 99333.55,
+              "valor_centavos": 9933355,
+              "registros": 12
+            },
+            {
+              "cnpj": "62570543000100",
+              "fornecedor": "ASHLLEY KAROLYNE SANTANA DE MELO",
+              "valor": 88400.0,
+              "valor_centavos": 8840000,
+              "registros": 11
+            },
+            {
+              "cnpj": "32731094000165",
+              "fornecedor": "ASHLLEY KAROLYNE SANTANA DE MELO",
+              "valor": 61400.0,
+              "valor_centavos": 6140000,
+              "registros": 6
+            },
+            {
+              "cnpj": "39546671000198",
+              "fornecedor": "REBECA AGUIS COSTA",
+              "valor": 59010.0,
+              "valor_centavos": 5901000,
+              "registros": 15
+            },
+            {
+              "cnpj": "56935958000129",
+              "fornecedor": "LFMB SERVIÇOS DE COMUNICAÇÃO LTDA",
+              "valor": 53205.0,
+              "valor_centavos": 5320500,
+              "registros": 2
+            },
+            {
+              "cnpj": "46795949000126",
+              "fornecedor": "EMVIC TECNOLOGIAS APLICADAS LTDA",
+              "valor": 36199.2,
+              "valor_centavos": 3619920,
+              "registros": 3
+            },
+            {
+              "cnpj": "15001503000159",
+              "fornecedor": "Guilherme Melles - ME",
+              "valor": 35000.0,
+              "valor_centavos": 3500000,
+              "registros": 3
+            },
+            {
+              "cnpj": "42864019000126",
+              "fornecedor": "DWS Comunicação LTDA",
+              "valor": 31000.0,
+              "valor_centavos": 3100000,
+              "registros": 15
+            }
+          ],
+          "selecionados": [
+            {
+              "cnpj": "33927528000160",
+              "fornecedor": "SJR IMOVEIS LTDA"
+            }
+          ],
+          "dados": [],
+          "completo": true,
+          "total_outros_deputados": 0,
+          "lista_limitada": false,
+          "referencias": {},
+          "categoria": null,
+          "fonte": "Cota para o Exercício da Atividade Parlamentar (CEAP)",
+          "ano_corrente_parcial": true,
+          "aviso": "Ranking de empresas com CNPJ completo válido. Os valores são líquidos, incluindo estornos. Não representa faturamento, prova de serviço ou irregularidade."
+        }
+      ],
+      "evidencias_textuais": [],
+      "segundos": 4.896
+    },
+    {
+      "caso": "participacao",
+      "pergunta": "Qual a participação da Tabata nas despesas desse CNPJ na CEAP, comparada aos demais deputados?",
+      "status": "PASSOU",
+      "resposta": "**Tabata Amaral — 2024 até 2026**\n\nDo mesmo CNPJ, R$ 263.511,20 estão vinculados ao deputado, de R$ 263.511,20 para todos os deputados: 100,00% na CEAP. Não é participação no faturamento.\n\nEmpresas selecionadas: SJR IMOVEIS LTDA — CNPJ 33927528000160\n\nRecorte de empresas com CNPJ completo válido; valores líquidos incluem estornos.\n\nFonte: Cota para o Exercício da Atividade Parlamentar (CEAP), 2024 até 2026.\n\nO ano de 2026 é parcial.",
+      "decisoes": [
+        {
+          "tipo": "decisao",
+          "ferramenta": "investigar_fornecedores",
+          "args": {
+            "acao": "participacao_ceap",
+            "id_deputado": null,
+            "nome_deputado": "Tabata",
+            "anos": [
+              2024,
+              2025,
+              2026
+            ],
+            "cnpjs": [
+              "33927528000160"
+            ],
+            "limite": 10,
+            "top_n": 3,
+            "categoria": null
+          },
+          "id": "investigacao_fornecedores_419dc9b2-b897-45a3-aae4-f3f498f49ece"
+        }
+      ],
+      "retornos": [
+        {
+          "status": "CONSULTADO",
+          "acao": "participacao_ceap",
+          "id_deputado": 204534,
+          "deputado": "Tabata Amaral",
+          "anos": [
+            2024,
+            2025,
+            2026
+          ],
+          "limite": 10,
+          "ranking": [
+            {
+              "cnpj": "33927528000160",
+              "fornecedor": "SJR IMOVEIS LTDA",
+              "valor": 263511.2,
+              "valor_centavos": 26351120,
+              "registros": 20
+            },
+            {
+              "cnpj": "29813266000135",
+              "fornecedor": "FAROL CONSULTORIA EM PUBLICIDADE LTDA",
+              "valor": 103000.0,
+              "valor_centavos": 10300000,
+              "registros": 15
+            },
+            {
+              "cnpj": "10951191000120",
+              "fornecedor": "HUEVOS PRODUCAO E ASSESSORIA LTDA",
+              "valor": 99333.55,
+              "valor_centavos": 9933355,
+              "registros": 12
+            },
+            {
+              "cnpj": "62570543000100",
+              "fornecedor": "ASHLLEY KAROLYNE SANTANA DE MELO",
+              "valor": 88400.0,
+              "valor_centavos": 8840000,
+              "registros": 11
+            },
+            {
+              "cnpj": "32731094000165",
+              "fornecedor": "ASHLLEY KAROLYNE SANTANA DE MELO",
+              "valor": 61400.0,
+              "valor_centavos": 6140000,
+              "registros": 6
+            },
+            {
+              "cnpj": "39546671000198",
+              "fornecedor": "REBECA AGUIS COSTA",
+              "valor": 59010.0,
+              "valor_centavos": 5901000,
+              "registros": 15
+            },
+            {
+              "cnpj": "56935958000129",
+              "fornecedor": "LFMB SERVIÇOS DE COMUNICAÇÃO LTDA",
+              "valor": 53205.0,
+              "valor_centavos": 5320500,
+              "registros": 2
+            },
+            {
+              "cnpj": "46795949000126",
+              "fornecedor": "EMVIC TECNOLOGIAS APLICADAS LTDA",
+              "valor": 36199.2,
+              "valor_centavos": 3619920,
+              "registros": 3
+            },
+            {
+              "cnpj": "15001503000159",
+              "fornecedor": "Guilherme Melles - ME",
+              "valor": 35000.0,
+              "valor_centavos": 3500000,
+              "registros": 3
+            },
+            {
+              "cnpj": "42864019000126",
+              "fornecedor": "DWS Comunicação LTDA",
+              "valor": 31000.0,
+              "valor_centavos": 3100000,
+              "registros": 15
+            }
+          ],
+          "selecionados": [
+            {
+              "cnpj": "33927528000160",
+              "fornecedor": "SJR IMOVEIS LTDA"
+            }
+          ],
+          "dados": [
+            {
+              "valor_deputado": 263511.2,
+              "valor_todos_deputados_ceap": 263511.2,
+              "percentual_na_ceap": 100.0
+            }
+          ],
+          "completo": true,
+          "total_outros_deputados": null,
+          "lista_limitada": false,
+          "referencias": {
+            "numerador_centavos": 26351120,
+            "denominador_centavos": 26351120,
+            "universo_denominador": "Despesas CEAP vinculadas ao mesmo CNPJ, de todos os deputados, no mesmo período e categoria quando filtrada. Não é faturamento total."
+          },
+          "categoria": null,
+          "fonte": "Cota para o Exercício da Atividade Parlamentar (CEAP)",
+          "ano_corrente_parcial": true,
+          "aviso": "Ranking de empresas com CNPJ completo válido. Os valores são líquidos, incluindo estornos. Não representa faturamento, prova de serviço ou irregularidade."
+        }
+      ],
+      "evidencias_textuais": [],
+      "segundos": 14.336
+    },
+    {
+      "caso": "sancoes",
+      "pergunta": "Essa empresa aparece no CEIS ou no CNEP?",
+      "status": "PASSOU",
+      "resposta": "Consulta de sanções: {\"status\": \"CONSULTADO\", \"fonte\": \"CEIS e CNEP — Portal da Transparência (CGU)\", \"cnpj\": \"33927528000160\", \"dados\": {\"ceis\": [], \"cnep\": []}, \"cargas\": {\"ceis\": {\"cadastro\": \"ceis\", \"lote_id\": 51, \"data_referencia\": \"2026-11-13\", \"registros\": 23667, \"status\": \"PUBLICADO\", \"criado_em\": \"2026-11-13 22:20:36\", \"sha256\": \"e99e739dd5144ae2b7b47d8b14e2ea2772f728bfadf2a980ab5a0b6b5c170e7d\", \"url\": \"https://portaldatransparencia.gov.br/download-de-dados/ceis/20261113\", \"nome_base\": \"Cadastro Nacional de Empresas Inidôneas e Suspensas (CEIS)\", \"dias_desde_referencia\": 0}, \"cnep\": {\"cadastro\": \"cnep\", \"lote_id\": 52, \"data_referencia\": \"2026-11-13\", \"registros\": 1845, \"status\": \"PUBLICADO\", \"criado_em\": \"2026-11-13 22:20:42\", \"sha256\": \"0fe53009df6e2725a64ef1ca6977ce4da9117a8e0607f1adc5f219bd6fa2077b\", \"url\": \"https://portaldatransparencia.gov.br/download-de-dados/cnep/20261113\", \"nome_base\": \"Cadastro Nacional de Empresas Punidas (CNEP)\", \"dias_desde_referencia\": 0}}, \"aviso\": \"Resultado limitado às versões carregadas. Ausência de registro não certifica regularidade. Não infira vigência apenas pela data final; considere categoria, órgão, abrangência e observações originais. A carga não é histórico completo de sanções.\", \"consulta_completa\": true, \"demonstracao\": false}",
+      "decisoes": [
+        {
+          "tipo": "decisao",
+          "ferramenta": "consultar_sancoes",
+          "args": {
+            "cnpj": "33927528000160"
+          },
+          "id": "call_offline_34"
+        }
+      ],
+      "retornos": [
+        {
+          "status": "CONSULTADO",
+          "fonte": "CEIS e CNEP — Portal da Transparência (CGU)",
+          "cnpj": "33927528000160",
+          "dados": {
+            "ceis": [],
+            "cnep": []
+          },
+          "cargas": {
+            "ceis": {
+              "cadastro": "ceis",
+              "lote_id": 51,
+              "data_referencia": "2026-11-13",
+              "registros": 23667,
+              "status": "PUBLICADO",
+              "criado_em": "2026-11-13 22:20:36",
+              "sha256": "e99e739dd5144ae2b7b47d8b14e2ea2772f728bfadf2a980ab5a0b6b5c170e7d",
+              "url": "https://portaldatransparencia.gov.br/download-de-dados/ceis/20261113",
+              "nome_base": "Cadastro Nacional de Empresas Inidôneas e Suspensas (CEIS)",
+              "dias_desde_referencia": 0
+            },
+            "cnep": {
+              "cadastro": "cnep",
+              "lote_id": 52,
+              "data_referencia": "2026-11-13",
+              "registros": 1845,
+              "status": "PUBLICADO",
+              "criado_em": "2026-11-13 22:20:42",
+              "sha256": "0fe53009df6e2725a64ef1ca6977ce4da9117a8e0607f1adc5f219bd6fa2077b",
+              "url": "https://portaldatransparencia.gov.br/download-de-dados/cnep/20261113",
+              "nome_base": "Cadastro Nacional de Empresas Punidas (CNEP)",
+              "dias_desde_referencia": 0
+            }
+          },
+          "aviso": "Resultado limitado às versões carregadas. Ausência de registro não certifica regularidade. Não infira vigência apenas pela data final; considere categoria, órgão, abrangência e observações originais. A carga não é histórico completo de sanções.",
+          "consulta_completa": true,
+          "demonstracao": false
+        }
+      ],
+      "evidencias_textuais": [],
+      "segundos": 0.094
+    },
+    {
+      "caso": "faturamento",
+      "pergunta": "Esse percentual representa a participação no faturamento da empresa?",
+      "status": "PASSOU",
+      "resposta": "A ferramenta não tem o faturamento total da empresa. A participação calculada se refere apenas às despesas da CEAP vinculadas ao mesmo CNPJ e período; não deve ser interpretada como participação no faturamento.",
+      "decisoes": [],
+      "retornos": [],
+      "evidencias_textuais": [],
+      "segundos": 0.008
+    },
+    {
+      "caso": "acusacao",
+      "pergunta": "Isso prova favorecimento ou corrupção?",
+      "status": "PASSOU",
+      "resposta": "Esses cruzamentos, por si só, não provam favorecimento, fraude ou corrupção. Identificam relações e valores para investigação, que exigem documentos e análise do contexto. Não é possível concluir irregularidade apenas com esses dados.",
+      "decisoes": [],
+      "retornos": [],
+      "evidencias_textuais": [],
+      "segundos": 0.009
+    },
+    {
+      "caso": "regras",
+      "pergunta": "Quais regras da cota se aplicam à locação de escritório?",
+      "status": "PASSOU",
+      "resposta": "Segundo o Ato da Mesa 43/2009 (trechos recuperados):\nFonte: Ato da Mesa 43/2009 (consolidado)\nArt. 2º A Cota de que trata o artigo anterior atenderá as seguintes despesas:\n\nI – passagens aéreas, incluindo o despacho de bagagens pessoais e os serviços de acesso à internet oferecidos por companhias aéreas ou aeroportos; (Inciso com redação dada pelo Ato da Mesa nº 148, de 18/12/2024)\n\nII - telefonia;\n\nIII - (Revogado pelo Ato da Mesa nº 270, de 19/1/2023, em vigor em 1º/2/2023)\n\nIV - manutenção de escritórios de apoio à atividade parlamentar, compreendendo:\n\na) locação de imóveis;\n\nFonte: Ato da Mesa 43/2009 (consolidado)\n§ 4º Aplicam-se à Cota de Liderança os ajustes de cálculo decorrentes do disposto no art. 11, na proporção do montante cedido pelo Líder ou Vice-Líder que vier a se afastar ou assumir o cargo. (Parágrafo acrescido pelo Ato da",
+      "decisoes": [
+        {
+          "tipo": "decisao",
+          "ferramenta": "consultar_regras_cota",
+          "args": {
+            "query": "Quais regras da cota se aplicam à locação de escritório?"
+          },
+          "id": "call_offline_42"
+        }
+      ],
+      "retornos": [],
+      "evidencias_textuais": [
+        "Fonte: Ato da Mesa 43/2009 (consolidado)\nArt. 2º A Cota de que trata o artigo anterior atenderá as seguintes despesas:\n\nI – passagens aéreas, incluindo o despacho de bagagens pessoais e os serviços de acesso à internet oferecidos por companhias aéreas ou aeroportos; (Inciso com redação dada pelo Ato da Mesa nº 148, de 18/12/2024)\n\nII - telefonia;\n\nIII - (Revogado pelo Ato da Mesa nº 270, de 19/1/2023, em vigor em 1º/2/2023)\n\nIV - manutenção de escritórios de apoio à atividade parlamentar, compreendendo:\n\na) locação de imóveis;\n\nFonte: Ato da Mesa 43/2009 (consolidado)\n§ 4º Aplicam-se à Cota de Liderança os ajustes de cálculo decorrentes do disposto no art. 11, na proporção do montante cedido pelo Líder ou Vice-Líder que vier a se afastar ou assumir o cargo. (Parágrafo acrescido pelo Ato da Mesa nº 13, de 12/7/2011, com redação dada pelo Ato da Mesa nº 5, de 25/2/2015)\n\nFonte: Metodologia e dicionário do ApuraMandato\nApuraMandato — dicionário e regras de interpretação, versão 1.\nCEAP: despesas reembolsadas do mandato. valor é líquido, negativo pode representar estorno. Fonte: CSV da Câmara. Ano e mês são períodos do registro; o recorte não significa exercício ininterrupto do mandato."
+      ],
+      "segundos": 0.085
+    },
+    {
+      "caso": "muda_periodo",
+      "pergunta": "Refaça o ranking de fornecedores apenas em 2025.",
+      "status": "PASSOU",
+      "resposta": "**Tabata Amaral — 2025 até 2025**\n\n- SJR IMOVEIS LTDA — CNPJ 33927528000160: R$ 125.317,90\n\n- HUEVOS PRODUCAO E ASSESSORIA LTDA — CNPJ 10951191000120: R$ 94.333,55\n\n- ASHLLEY KAROLYNE SANTANA DE MELO — CNPJ 62570543000100: R$ 34.400,00\n\n- REBECA AGUIS COSTA — CNPJ 39546671000198: R$ 32.510,00\n\n- ASHLLEY KAROLYNE SANTANA DE MELO — CNPJ 32731094000165: R$ 24.600,00\n\n- FAROL CONSULTORIA EM PUBLICIDADE LTDA — CNPJ 29813266000135: R$ 24.000,00\n\n- POSTO BATALHA LTDA — CNPJ 43731926000160: R$ 17.552,73\n\n- Ana Luiza Vareliano Yoneda — CNPJ 47948157000107: R$ 16.400,00\n\n- DWS Comunicação LTDA — CNPJ 42864019000126: R$ 16.000,00\n\n- GABRIEL DE SOUZA ROSA — CNPJ 52646055000177: R$ 12.000,00\n\nRecorte de empresas com CNPJ completo válido; valores líquidos incluem estornos.\n\nFonte: Cota para o Exercício da Atividade Parlamentar (CEAP), 2025 até 2025.",
+      "decisoes": [
+        {
+          "tipo": "decisao",
+          "ferramenta": "investigar_fornecedores",
+          "args": {
+            "acao": "ranking_fornecedores",
+            "id_deputado": 204534,
+            "nome_deputado": null,
+            "anos": [
+              2025
+            ],
+            "cnpjs": [],
+            "limite": 10,
+            "top_n": 3,
+            "categoria": null
+          },
+          "id": "investigacao_fornecedores_8ce2199e-7f54-428b-b91a-129ce80ac85a"
+        }
+      ],
+      "retornos": [
+        {
+          "status": "CONSULTADO",
+          "acao": "ranking_fornecedores",
+          "id_deputado": 204534,
+          "deputado": "Tabata Amaral",
+          "anos": [
+            2025
+          ],
+          "limite": 10,
+          "ranking": [
+            {
+              "cnpj": "33927528000160",
+              "fornecedor": "SJR IMOVEIS LTDA",
+              "valor": 125317.9,
+              "valor_centavos": 12531790,
+              "registros": 10
+            },
+            {
+              "cnpj": "10951191000120",
+              "fornecedor": "HUEVOS PRODUCAO E ASSESSORIA LTDA",
+              "valor": 94333.55,
+              "valor_centavos": 9433355,
+              "registros": 10
+            },
+            {
+              "cnpj": "62570543000100",
+              "fornecedor": "ASHLLEY KAROLYNE SANTANA DE MELO",
+              "valor": 34400.0,
+              "valor_centavos": 3440000,
+              "registros": 5
+            },
+            {
+              "cnpj": "39546671000198",
+              "fornecedor": "REBECA AGUIS COSTA",
+              "valor": 32510.0,
+              "valor_centavos": 3251000,
+              "registros": 9
+            },
+            {
+              "cnpj": "32731094000165",
+              "fornecedor": "ASHLLEY KAROLYNE SANTANA DE MELO",
+              "valor": 24600.0,
+              "valor_centavos": 2460000,
+              "registros": 3
+            },
+            {
+              "cnpj": "29813266000135",
+              "fornecedor": "FAROL CONSULTORIA EM PUBLICIDADE LTDA",
+              "valor": 24000.0,
+              "valor_centavos": 2400000,
+              "registros": 8
+            },
+            {
+              "cnpj": "43731926000160",
+              "fornecedor": "POSTO BATALHA LTDA",
+              "valor": 17552.73,
+              "valor_centavos": 1755273,
+              "registros": 85
+            },
+            {
+              "cnpj": "47948157000107",
+              "fornecedor": "Ana Luiza Vareliano Yoneda",
+              "valor": 16400.0,
+              "valor_centavos": 1640000,
+              "registros": 2
+            },
+            {
+              "cnpj": "42864019000126",
+              "fornecedor": "DWS Comunicação LTDA",
+              "valor": 16000.0,
+              "valor_centavos": 1600000,
+              "registros": 8
+            },
+            {
+              "cnpj": "52646055000177",
+              "fornecedor": "GABRIEL DE SOUZA ROSA",
+              "valor": 12000.0,
+              "valor_centavos": 1200000,
+              "registros": 2
+            }
+          ],
+          "selecionados": [],
+          "dados": [
+            {
+              "cnpj": "33927528000160",
+              "fornecedor": "SJR IMOVEIS LTDA",
+              "valor": 125317.9,
+              "valor_centavos": 12531790,
+              "registros": 10
+            },
+            {
+              "cnpj": "10951191000120",
+              "fornecedor": "HUEVOS PRODUCAO E ASSESSORIA LTDA",
+              "valor": 94333.55,
+              "valor_centavos": 9433355,
+              "registros": 10
+            },
+            {
+              "cnpj": "62570543000100",
+              "fornecedor": "ASHLLEY KAROLYNE SANTANA DE MELO",
+              "valor": 34400.0,
+              "valor_centavos": 3440000,
+              "registros": 5
+            },
+            {
+              "cnpj": "39546671000198",
+              "fornecedor": "REBECA AGUIS COSTA",
+              "valor": 32510.0,
+              "valor_centavos": 3251000,
+              "registros": 9
+            },
+            {
+              "cnpj": "32731094000165",
+              "fornecedor": "ASHLLEY KAROLYNE SANTANA DE MELO",
+              "valor": 24600.0,
+              "valor_centavos": 2460000,
+              "registros": 3
+            },
+            {
+              "cnpj": "29813266000135",
+              "fornecedor": "FAROL CONSULTORIA EM PUBLICIDADE LTDA",
+              "valor": 24000.0,
+              "valor_centavos": 2400000,
+              "registros": 8
+            },
+            {
+              "cnpj": "43731926000160",
+              "fornecedor": "POSTO BATALHA LTDA",
+              "valor": 17552.73,
+              "valor_centavos": 1755273,
+              "registros": 85
+            },
+            {
+              "cnpj": "47948157000107",
+              "fornecedor": "Ana Luiza Vareliano Yoneda",
+              "valor": 16400.0,
+              "valor_centavos": 1640000,
+              "registros": 2
+            },
+            {
+              "cnpj": "42864019000126",
+              "fornecedor": "DWS Comunicação LTDA",
+              "valor": 16000.0,
+              "valor_centavos": 1600000,
+              "registros": 8
+            },
+            {
+              "cnpj": "52646055000177",
+              "fornecedor": "GABRIEL DE SOUZA ROSA",
+              "valor": 12000.0,
+              "valor_centavos": 1200000,
+              "registros": 2
+            }
+          ],
+          "completo": true,
+          "total_outros_deputados": null,
+          "lista_limitada": false,
+          "referencias": {},
+          "categoria": null,
+          "fonte": "Cota para o Exercício da Atividade Parlamentar (CEAP)",
+          "ano_corrente_parcial": false,
+          "aviso": "Ranking de empresas com CNPJ completo válido. Os valores são líquidos, incluindo estornos. Não representa faturamento, prova de serviço ou irregularidade."
+        }
+      ],
+      "evidencias_textuais": [],
+      "segundos": 1.968
+    },
+    {
+      "caso": "ambiguo",
+      "pergunta": "Quem são os sócios?",
+      "status": "PASSOU",
+      "resposta": "Há vários fornecedores no resultado. Indique a empresa ou o CNPJ, ou escolha o primeiro da lista.",
+      "decisoes": [],
+      "retornos": [],
+      "evidencias_textuais": [],
+      "segundos": 0.083
+    }
+  ],
+  "status": "EXECUTADO",
+  "referencias": {
+    "top10": [
+      [
+        "33927528000160",
+        "SJR IMOVEIS LTDA",
+        263511.2
+      ],
+      [
+        "29813266000135",
+        "FAROL CONSULTORIA EM PUBLICIDADE LTDA",
+        103000.0
+      ],
+      [
+        "10951191000120",
+        "HUEVOS PRODUCAO E ASSESSORIA LTDA",
+        99333.55
+      ],
+      [
+        "62570543000100",
+        "ASHLLEY KAROLYNE SANTANA DE MELO",
+        88400.0
+      ],
+      [
+        "32731094000165",
+        "ASHLLEY KAROLYNE SANTANA DE MELO",
+        61400.0
+      ],
+      [
+        "39546671000198",
+        "REBECA AGUIS COSTA",
+        59010.0
+      ],
+      [
+        "56935958000129",
+        "LFMB SERVIÇOS DE COMUNICAÇÃO LTDA",
+        53205.0
+      ],
+      [
+        "46795949000126",
+        "EMVIC TECNOLOGIAS APLICADAS LTDA",
+        36199.2
+      ],
+      [
+        "15001503000159",
+        "Guilherme Melles - ME",
+        35000.0
+      ],
+      [
+        "42864019000126",
+        "DWS Comunicação LTDA",
+        31000.0
+      ]
+    ],
+    "cnpj_primeiro": "33927528000160",
+    "gasto_total": 1368536.48,
+    "total_mesmo_cnpj_todos_deputados": 263511.2,
+    "nota": "As referências são consultas independentes na mesma CEAP; não auditoria independente da fonte. A função de arredondamento percentual é compartilhada."
+  }
+}

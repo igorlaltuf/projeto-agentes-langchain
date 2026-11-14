@@ -17,9 +17,9 @@ INDICES_DIR = RAIZ / "indices"
 
 ANO_CEAP = 2025
 CSV_CEAP = DATA_DIR / f"ceap_{ANO_CEAP}.csv"
-SQLITE_CEAP = DATA_DIR / "ceap.db"
+SQLITE_CEAP = Path(os.getenv("APURAMANDATO_DB", str(DATA_DIR / "ceap.db"))).expanduser()
 TEXTO_NORMAS = DATA_DIR / "normas" / "ato_mesa_43_2009.txt"
-INDICE_ATO_MESA = INDICES_DIR / "ato_mesa"
+INDICE_ATO_MESA = Path(os.getenv("APURAMANDATO_INDEX", str(INDICES_DIR / "ato_mesa")))
 
 MODO_OFFLINE = os.getenv("MODO_OFFLINE", "false").lower() == "true"
 
@@ -31,3 +31,11 @@ API_CAMARA = "https://dadosabertos.camara.leg.br/api/v2"
 API_BRASIL = "https://brasilapi.com.br/api"
 
 HOJE = date.today().isoformat()
+
+USAR_CACHE_API = os.getenv("USAR_CACHE_API", "true").lower() == "true"
+MAX_TOKENS_CONTEXTO = 12000
+
+ULTIMO_ANO_FECHADO = 2025
+
+# Fontes eleitorais e emendas ficam disponíveis apenas no modo administrativo ampliado.
+ESCOPO_AMPLIADO = os.getenv("APURAMANDATO_ESCOPO", "principal").lower() == "ampliado"

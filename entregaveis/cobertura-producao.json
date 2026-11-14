@@ -1,0 +1,232 @@
+[
+  {
+    "lote_id": 40,
+    "fonte": "CAMARA:ceap",
+    "cobertura": "2018",
+    "atualizado_em": "2026-11-13 03:57:11",
+    "status": "PUBLICADO",
+    "sha256": "52058e5c6dd42c53bb702ace2e1fdf5f640e0505a69d01175cad2c095c9a3fde",
+    "url": "https://www.camara.leg.br/cotas/Ano-2018.csv.zip",
+    "linhas": 0
+  },
+  {
+    "lote_id": 41,
+    "fonte": "CAMARA:ceap",
+    "cobertura": "2019",
+    "atualizado_em": "2026-11-13 03:57:11",
+    "status": "PUBLICADO",
+    "sha256": "87b7196901e4ca7b444ce6c50a18b8fc1f53b6eb44052c64d5bcb4481ee74c81",
+    "url": "https://www.camara.leg.br/cotas/Ano-2019.csv.zip",
+    "linhas": 0
+  },
+  {
+    "lote_id": 42,
+    "fonte": "CAMARA:ceap",
+    "cobertura": "2020",
+    "atualizado_em": "2026-11-13 03:57:11",
+    "status": "PUBLICADO",
+    "sha256": "fdef708b93c53bcdd6d0dc76d457bc5568513c9c1ed2905ee3f88ad3d25854b1",
+    "url": "https://www.camara.leg.br/cotas/Ano-2020.csv.zip",
+    "linhas": 0
+  },
+  {
+    "lote_id": 43,
+    "fonte": "CAMARA:ceap",
+    "cobertura": "2021",
+    "atualizado_em": "2026-11-13 03:57:11",
+    "status": "PUBLICADO",
+    "sha256": "35344a81e641d180ff4003d1de9ea2ac2555b49c0de5cbe43aab19c0bddd6eb8",
+    "url": "https://www.camara.leg.br/cotas/Ano-2021.csv.zip",
+    "linhas": 0
+  },
+  {
+    "lote_id": 44,
+    "fonte": "CAMARA:ceap",
+    "cobertura": "2022",
+    "atualizado_em": "2026-11-13 03:57:11",
+    "status": "PUBLICADO",
+    "sha256": "a61d83c986bb7064c2b80d600cd287d180b9b18c35f5124cef53049bdcbd0df4",
+    "url": "https://www.camara.leg.br/cotas/Ano-2022.csv.zip",
+    "linhas": 0
+  },
+  {
+    "lote_id": 45,
+    "fonte": "CAMARA:ceap",
+    "cobertura": "2023",
+    "atualizado_em": "2026-11-13 03:57:11",
+    "status": "PUBLICADO",
+    "sha256": "89d4e257f5759b7a850b54cadfb7724d7b08f3f4c9c92cb56e755a4c6d148c0f",
+    "url": "https://www.camara.leg.br/cotas/Ano-2023.csv.zip",
+    "linhas": 0
+  },
+  {
+    "lote_id": 46,
+    "fonte": "CAMARA:ceap",
+    "cobertura": "2024",
+    "atualizado_em": "2026-11-13 03:57:11",
+    "status": "PUBLICADO",
+    "sha256": "29d834c73b434375189a8df21e7ae69d9c1625105b1f6cf021b6404572d2c082",
+    "url": "https://www.camara.leg.br/cotas/Ano-2024.csv.zip",
+    "linhas": 0
+  },
+  {
+    "lote_id": 47,
+    "fonte": "CAMARA:ceap",
+    "cobertura": "2025",
+    "atualizado_em": "2026-11-13 03:57:12",
+    "status": "PUBLICADO",
+    "sha256": "21af6df198a2f56aaaa80cf89b824abfbbc82c49a3738ef26f48dd8a2e1c2b21",
+    "url": "https://www.camara.leg.br/cotas/Ano-2025.csv.zip",
+    "linhas": 0
+  },
+  {
+    "lote_id": 48,
+    "fonte": "CAMARA:ceap",
+    "cobertura": "2026",
+    "atualizado_em": "2026-11-13 03:57:12",
+    "status": "PUBLICADO",
+    "sha256": "31d60473bbfa65ea068640528943a597aadaaeaafc73f6740544cc977636a662",
+    "url": "https://www.camara.leg.br/cotas/Ano-2026.csv.zip",
+    "linhas": 0
+  },
+  {
+    "lote_id": 25,
+    "fonte": "CGU:emendas",
+    "cobertura": "arquivo completo",
+    "atualizado_em": "2026-11-13 02:59:08",
+    "status": "PUBLICADO",
+    "sha256": "7ad8575614a8eb891004319f7a23a497c16202d6b4ed3f3480ecfe73960e3a44",
+    "url": "https://portaldatransparencia.gov.br/download-de-dados/emendas-parlamentares/UNICO",
+    "linhas": 94920
+  },
+  {
+    "lote_id": 50,
+    "fonte": "CGU:favorecidos",
+    "cobertura": "arquivo completo",
+    "atualizado_em": "2026-11-13 14:43:35",
+    "status": "PUBLICADO",
+    "sha256": "293390fa9e7d708b5ff68faef24a0ff85700f7ce655a5493ed810b5519341c01",
+    "url": "https://portaldatransparencia.gov.br/download-de-dados/emendas-parlamentares/UNICO",
+    "linhas": 833303
+  },
+  {
+    "lote_id": 20,
+    "fonte": "TSE:bens",
+    "cobertura": "2018",
+    "atualizado_em": "2026-11-13 02:19:03",
+    "status": "PUBLICADO",
+    "sha256": "5ca61bb94f2b607102ddc9837fc07cc42dd274ba026b41f83a4a8dadf261f081",
+    "url": "https://cdn.tse.jus.br/estatistica/sead/odsele/bem_candidato/bem_candidato_2018.zip",
+    "linhas": 30447
+  },
+  {
+    "lote_id": 22,
+    "fonte": "TSE:bens",
+    "cobertura": "2022",
+    "atualizado_em": "2026-11-13 02:19:30",
+    "status": "PUBLICADO",
+    "sha256": "874f26485479951c70464f05f6fae3243886f9e90f1b155fae8b9103f78ae4da",
+    "url": "https://cdn.tse.jus.br/estatistica/sead/odsele/bem_candidato/bem_candidato_2022.zip",
+    "linhas": 36223
+  },
+  {
+    "lote_id": 24,
+    "fonte": "TSE:bens",
+    "cobertura": "2026",
+    "atualizado_em": "2026-11-13 02:19:53",
+    "status": "PUBLICADO",
+    "sha256": "1ab0166cfd96658e01970a5d0571b9db80770783526bd5331eb66ee2ef6c15a4",
+    "url": "https://cdn.tse.jus.br/estatistica/sead/odsele/bem_candidato/bem_candidato_2026.zip",
+    "linhas": 28396
+  },
+  {
+    "lote_id": 19,
+    "fonte": "TSE:candidatos",
+    "cobertura": "2018",
+    "atualizado_em": "2026-11-13 02:18:49",
+    "status": "PUBLICADO",
+    "sha256": "381edab4b227ca7686db1472b9744f1a831738d14e21568b1bea4016f5a7743f",
+    "url": "https://cdn.tse.jus.br/estatistica/sead/odsele/consulta_cand/consulta_cand_2018.zip",
+    "linhas": 8607
+  },
+  {
+    "lote_id": 21,
+    "fonte": "TSE:candidatos",
+    "cobertura": "2022",
+    "atualizado_em": "2026-11-13 02:19:16",
+    "status": "PUBLICADO",
+    "sha256": "c59ee7af311719735e66cda4307483eb5ca97825050b3514ac1159ad046a393b",
+    "url": "https://cdn.tse.jus.br/estatistica/sead/odsele/consulta_cand/consulta_cand_2022.zip",
+    "linhas": 10630
+  },
+  {
+    "lote_id": 23,
+    "fonte": "TSE:candidatos",
+    "cobertura": "2026",
+    "atualizado_em": "2026-11-13 02:19:41",
+    "status": "PUBLICADO",
+    "sha256": "605dae2e94c709988f8ec8cb4f5d1c6abd231aeaf25b88b99aa77dbdb69c3057",
+    "url": "https://cdn.tse.jus.br/estatistica/sead/odsele/consulta_cand/consulta_cand_2026.zip",
+    "linhas": 7803
+  },
+  {
+    "lote_id": 36,
+    "fonte": "TSE:despesas",
+    "cobertura": "2018",
+    "atualizado_em": "2026-11-13 03:29:26",
+    "status": "PUBLICADO",
+    "sha256": "9a31e02810e0b356352415134d8a4c472b5917145fa67f787db370522fed195b",
+    "url": "",
+    "linhas": 762384
+  },
+  {
+    "lote_id": 37,
+    "fonte": "TSE:despesas",
+    "cobertura": "2022",
+    "atualizado_em": "2026-11-13 03:38:35",
+    "status": "PUBLICADO",
+    "sha256": "7f50ec6c39271babb6adfe76221d9499fa6c6302877d1be121a64715bdfef18f",
+    "url": "https://cdn.tse.jus.br/estatistica/sead/odsele/prestacao_contas/prestacao_de_contas_eleitorais_candidatos_2022.zip",
+    "linhas": 1139275
+  },
+  {
+    "lote_id": 39,
+    "fonte": "TSE:despesas",
+    "cobertura": "2026",
+    "atualizado_em": "2026-11-13 03:50:14",
+    "status": "PUBLICADO",
+    "sha256": "3ad86032904489a17c4bc63a077c589644037ebfb7d4385e174b4cd59038cc6c",
+    "url": "https://cdn.tse.jus.br/estatistica/sead/odsele/prestacao_contas/prestacao_de_contas_eleitorais_candidatos_2026.zip",
+    "linhas": 925492
+  },
+  {
+    "lote_id": 35,
+    "fonte": "TSE:receitas",
+    "cobertura": "2018",
+    "atualizado_em": "2026-11-13 03:25:37",
+    "status": "PUBLICADO",
+    "sha256": "e2ee83600b44966976bce62786f9e475b11ec4e37ec63ef46fb5bbd0d45c1e7f",
+    "url": "",
+    "linhas": 100435
+  },
+  {
+    "lote_id": 49,
+    "fonte": "TSE:receitas",
+    "cobertura": "2022",
+    "atualizado_em": "2026-11-13 04:00:43",
+    "status": "PUBLICADO",
+    "sha256": "3be86fcaae2c759c65fca7db60b994edad70126eb3cc5aa0f6cba95eb7b2ed61",
+    "url": "https://cdn.tse.jus.br/estatistica/sead/odsele/prestacao_contas/prestacao_de_contas_eleitorais_candidatos_2022.zip",
+    "linhas": 103703
+  },
+  {
+    "lote_id": 38,
+    "fonte": "TSE:receitas",
+    "cobertura": "2026",
+    "atualizado_em": "2026-11-13 03:41:30",
+    "status": "PUBLICADO",
+    "sha256": "84c275f81b1efadf38f5d8306c2138e37682fb194d2853bef0b03ada39585f83",
+    "url": "https://cdn.tse.jus.br/estatistica/sead/odsele/prestacao_contas/prestacao_de_contas_eleitorais_candidatos_2026.zip",
+    "linhas": 86580
+  }
+]

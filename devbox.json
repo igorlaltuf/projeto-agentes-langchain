@@ -22,8 +22,18 @@
       "fixtures": "uv run python scripts/record_fixtures.py",
       "notebook": "uv run jupyter lab notebooks/",
       "lint": "uv run ruff check . && uv run ruff format --check .",
-      "test": "MODO_OFFLINE=true uv run pytest",
-      "check": "uv run python -c 'import src.agent, src.data, src.verification; print(\"imports ok\")'"
+      "test": "LANGCHAIN_TRACING_V2=false LANGSMITH_TRACING=false MODO_OFFLINE=true uv run pytest",
+      "check": "uv run python -c 'import src.agent, src.data, src.verification; print(\"imports ok\")'",
+      "migrate": "uv run python scripts/load_sources.py migrar",
+      "demo": "uv run python scripts/prepare_demo.py",
+      "sources": "uv run python scripts/load_sources.py catalogo",
+      "evaluate": "uv run python scripts/evaluate_mandato.py --demo",
+      "setup": "uv sync --locked && uv run python scripts/setup_project.py",
+      "sancoes": "uv run python -m src.sanctions --atualizar",
+      "validate": "uv run python scripts/validate_core.py",
+      "validate-online": "uv run python scripts/validate_core.py --online --saida entregaveis/validacao-nucleo-online.json",
+      "investigate-test": "uv run python scripts/validate_investigation.py",
+      "investigate-online": "uv run python scripts/validate_investigation.py --online --saida entregaveis/investigacao-completa-online.json"
     }
   }
 }

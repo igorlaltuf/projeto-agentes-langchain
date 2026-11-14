@@ -22,18 +22,18 @@ ARQUIVO_DATASET = config.RAIZ / "docs" / "dataset_avaliacao.json"
 
 CASOS_TESTE: list[dict[str, Any]] = [
     {
-        "nome": "gasto_categoria_api",
+        "nome": "gasto_categoria_local",
         "pergunta": "Quanto a deputada Tabata Amaral gastou com combustível em 2025?",
         "ferramentas_esperadas": ["buscar_deputado", "listar_despesas"],
         "valor_esperado": 48808.83,
-        "resposta_referencia": "Tabata Amaral gastou R$ 48.808,83 com combustíveis em 2025 (API da Câmara).",
+        "resposta_referencia": "Tabata Amaral gastou R$ 48.808,83 com combustíveis em 2025 (CSV CEAP).",
     },
     {
-        "nome": "gasto_total_api",
+        "nome": "gasto_total_local",
         "pergunta": "Qual foi o gasto total do deputado Nikolas Ferreira em 2025?",
         "ferramentas_esperadas": ["buscar_deputado", "listar_despesas"],
-        "valor_esperado": 463433.18,
-        "resposta_referencia": "Nikolas Ferreira gastou R$ 463.433,18 em 2025 (API da Câmara).",
+        "valor_esperado": 389263.25,
+        "resposta_referencia": "Nikolas Ferreira gastou R$ 389.263,25 em 2025 (CSV CEAP).",
     },
     {
         "nome": "media_partido_sql",
@@ -47,7 +47,7 @@ CASOS_TESTE: list[dict[str, Any]] = [
         "pergunta": "Gastos do Silva em 2025",
         "ferramentas_esperadas": ["buscar_deputado"],
         "ferramentas_proibidas": ["listar_despesas"],
-        "resposta_referencia": "Ha varios deputados com o nome Silva; o agente deve pedir qual deles.",
+        "resposta_referencia": "Consultar a busca local antes de esclarecer ambiguidade; se houver vários deputados, pedir qual. Se não houver correspondência, informar ausência na base.",
     },
     {
         "nome": "regra_rag",
@@ -61,6 +61,72 @@ CASOS_TESTE: list[dict[str, Any]] = [
         "pergunta": "Quem é o fornecedor de CNPJ 33.927.528/0001-60?",
         "ferramentas_esperadas": ["dados_fornecedor"],
         "resposta_referencia": "SJR IMOVEIS LTDA, corretagem de imoveis, Sao Paulo-SP (Brasil API).",
+    },
+]
+
+
+CASOS_TESTE.extend(
+    [
+        {
+            "nome": "emendas_pagamentos",
+            "pergunta": "Quais emendas foram pagas em 2026?",
+            "ferramentas_esperadas": ["consultar_dados"],
+            "valor_esperado": 500.0,
+            "resposta_referencia": "Amostra sintética: três autores distintos com R$ 500,00 cada; autoria individual e coletiva separadas.",
+        },
+        {
+            "nome": "tse_bens",
+            "pergunta": "Quais bens declarados em 2022?",
+            "ferramentas_esperadas": ["consultar_dados"],
+            "valor_esperado": 10000.0,
+            "resposta_referencia": "Amostra sintética: Pessoa de Demonstração declarou R$ 10.000,00 em bens em 2022.",
+        },
+        {
+            "nome": "tse_receitas",
+            "pergunta": "Quais receitas de campanha em 2018?",
+            "ferramentas_esperadas": ["consultar_dados"],
+            "valor_esperado": 1000.0,
+            "resposta_referencia": "Amostra sintética: R$ 1.000,00 em receitas eleitorais de 2018.",
+        },
+        {
+            "nome": "tse_despesas",
+            "pergunta": "Quais despesas de campanha em 2026?",
+            "ferramentas_esperadas": ["consultar_dados"],
+            "valor_esperado": 250.5,
+            "resposta_referencia": "Amostra sintética: R$ 250,50 em despesa de campanha, fornecedor fictício.",
+        },
+        {
+            "nome": "sancoes_demo",
+            "pergunta": "Há sanções para o CNPJ 11.222.333/0001-81?",
+            "ferramentas_esperadas": ["consultar_sancoes"],
+            "resposta_referencia": "Fixture sintética de demonstração, não consulta factual; sem conclusão de irregularidade.",
+        },
+        {
+            "nome": "emenda_sem_medida",
+            "pergunta": "Quanto em emendas em 2026?",
+            "ferramentas_esperadas": [],
+            "ferramentas_proibidas": ["consultar_dados"],
+            "resposta_referencia": "Perguntar se deseja pago, empenhado ou liquidado antes de consultar.",
+        },
+    ]
+)
+
+
+# As fontes ampliadas ficam preservadas, fora da avaliação padrão do núcleo.
+CASOS_AMPLIADOS = CASOS_TESTE[6:]
+CASOS_TESTE = CASOS_TESTE[:6] + [
+    {
+        "nome": "sancoes_locais",
+        "pergunta": "Há sanções para o CNPJ 33.927.528/0001-60?",
+        "ferramentas_esperadas": ["consultar_sancoes"],
+        "resposta_referencia": "Consultar CEIS/CNEP locais, informar datas ou indisponibilidade, sem certificar regularidade.",
+    },
+    {
+        "nome": "escopo_eleitoral",
+        "pergunta": "Quais bens declarados em 2022?",
+        "ferramentas_esperadas": [],
+        "ferramentas_proibidas": ["consultar_dados"],
+        "resposta_referencia": "Explicar que dados eleitorais estão fora do escopo principal e oferecer consulta CEAP.",
     },
 ]
 
@@ -137,7 +203,11 @@ def executar_caso(pergunta: str, agente=None, thread_id: str | None = None) -> d
     agente = agente or montar_agente()
     cfg = {"configurable": {"thread_id": thread_id or f"eval_{abs(hash(pergunta)) % 10**6}"}}
     estado = agente.invoke({"messages": [("user", pergunta)]}, config=cfg)
-    return {"resposta": estado["messages"][-1].content, "trajetoria": trajetoria(estado)}
+    return {
+        "resposta": estado["messages"][-1].content,
+        "trajetoria": trajetoria(estado),
+        "verificacao": estado.get("verificacao"),
+    }
 
 
 class _Run:
@@ -174,23 +244,25 @@ def langsmith_disponivel() -> bool:
     return bool(os.getenv("LANGCHAIN_API_KEY") or os.getenv("LANGSMITH_API_KEY"))
 
 
-def enviar_dataset_langsmith(nome: str = "apuracota-casos"):
+def enviar_dataset_langsmith(nome: str = "apuramandato-v1", casos: list[dict] | None = None):
     """Cria (ou reutiliza) o dataset no LangSmith com os casos de teste."""
     from langsmith import Client
 
     client = Client()
     existente = next((d for d in client.list_datasets(dataset_name=nome)), None)
-    dataset = existente or client.create_dataset(dataset_name=nome, description="Casos de teste do ApuraCota")
+    dataset = existente or client.create_dataset(
+        dataset_name=nome, description="Casos de teste do ApuraMandato"
+    )
     if not existente:
         client.create_examples(
-            inputs=[{"pergunta": c["pergunta"]} for c in CASOS_TESTE],
-            outputs=[{k: v for k, v in c.items() if k != "pergunta"} for c in CASOS_TESTE],
+            inputs=[{"pergunta": c["pergunta"]} for c in (casos or CASOS_TESTE)],
+            outputs=[{k: v for k, v in c.items() if k != "pergunta"} for c in (casos or CASOS_TESTE)],
             dataset_id=dataset.id,
         )
     return dataset
 
 
-def comparar_experimentos(nome_dataset: str = "apuracota-casos") -> list[dict]:
+def comparar_experimentos(nome_dataset: str = "apuramandato-v1") -> list[dict]:
     """Le no LangSmith todos os experimentos do dataset e resume notas, tokens, custo e latencia."""
     from langsmith import Client
 
@@ -227,7 +299,7 @@ def comparar_experimentos(nome_dataset: str = "apuracota-casos") -> list[dict]:
     return linhas
 
 
-def avaliar_no_langsmith(nome_dataset: str = "apuracota-casos", prefixo: str = "apuracota"):
+def avaliar_no_langsmith(nome_dataset: str = "apuramandato-v1", prefixo: str = "apuramandato"):
     """langsmith.evaluate com os tres avaliadores sobre o agente integrador."""
     from langsmith import evaluate
 
@@ -239,3 +311,15 @@ def avaliar_no_langsmith(nome_dataset: str = "apuracota-casos", prefixo: str = "
         experiment_prefix=prefixo,
         metadata={"modelo": config.MODELO_AGENTE, "offline": llm.offline()},
     )
+
+
+def casos_demonstracao() -> list[dict]:
+    """Referências da amostra, separadas das referências do CSV completo."""
+    import copy
+
+    casos = copy.deepcopy(CASOS_TESTE)
+    for caso in casos:
+        if caso["nome"] == "media_partido_sql":
+            caso["valor_esperado"] = 40954.73
+            caso["resposta_referencia"] = "Amostra CEAP: média do PSB de R$ 40.954,73 em 2025."
+    return casos

@@ -1,107 +1,119 @@
-# ApuraCota — Agente de apuração de gastos parlamentares (CEAP)
+# ApuraMandato
 
-Projeto da disciplina **Agentes Cognitivos com LangChain** (Infnet, 2026).
+Assistente de tecnologia cívica para investigar gastos parlamentares, conhecer fornecedores, consultar sanções e entender as regras da cota. Projeto da disciplina **Agentes Cognitivos com LangChain**.
 
-Um agente conversacional para repórteres que responde perguntas sobre a Cota para o Exercício da Atividade Parlamentar (CEAP) da Câmara dos Deputados. Ele decide sozinho entre consultar a **API de Dados Abertos da Câmara**, um **banco SQLite** com as despesas do ano e um **índice FAISS** com as regras da cota (Ato da Mesa 43/2009), mantém a memória da apuração entre turnos e **verifica os próprios números antes de responder**.
+## Escopo principal
 
-## Status
+- **CEAP:** gastos de deputados, categorias, anos, comparações e fornecedores.
+- **Normas da cota:** recuperação do Ato da Mesa nº 43/2009 com FAISS e complemento por termos exatos.
+- **BrasilAPI:** cadastro empresarial e quadro de sócios/administradores por CNPJ completo validado, com cache de até 24 horas.
+- **CEIS e CNEP:** registros de sanções importados dos arquivos oficiais da CGU, com data de referência.
 
-| Fase | Conteúdo | Status |
-|---|---|---|
-| 1 | MVP: chain com entrada e saída estruturadas (JSON), Runnable, `@chain` vs LCEL | ✅ online |
-| 2 | Agente ReAct, ferramentas (API da Câmara, SQL, hardcoded, semântica), roteamento, prompt PTCF, confiabilidade | ✅ online |
-| 3 | Memória CoALA, chatbot multi-turno, NLU (intenção e entidades) | ✅ online |
-| 4 | Text-to-query, retriever sobre índice FAISS salvo, diagnóstico de falha de recuperação | ✅ online |
-| 5 | Verificação factual + NLI, agente integrador, Streamlit, avaliação local e no LangSmith | ✅ online |
-| — | Relatório PDF, vídeo, entrega no Moodle (13/11/2026) | ⬜ |
+O agente principal não oferece consultas eleitorais nem emendas. Os dados, importadores e vínculos já preparados permanecem disponíveis como extensão administrativa. Nenhum cruzamento deve associar pessoas apenas pelo nome ou por documento mascarado.
 
-"✅ online" significa que o código está implementado, testado (`devbox run test`, 37 testes, modo offline) e os notebooks foram executados com `gpt-4o-mini` no agente, `gpt-4o` como juiz e índice FAISS real (`text-embedding-3-small`). Avaliação local online: 6/6 em trajetória, valor e juiz. No LangSmith: dataset `apuracota-casos` com seis experimentos (gpt-4o-mini, dummy offline e gpt-4o, duas rodadas cada), comparados por `comparar_experimentos()` no notebook 05.
-
-O plano detalhado, fase a fase e rubrica a rubrica, está em [`docs/PLANO_DE_IMPLEMENTACAO.md`](docs/PLANO_DE_IMPLEMENTACAO.md). O enunciado oficial está em [`docs/ENUNCIADO_E_RUBRICAS.md`](docs/ENUNCIADO_E_RUBRICAS.md).
-
-## Estrutura
-
-```
-projeto-agentes-langchain/
-├── devbox.json / pyproject.toml / uv.lock   # ambiente reprodutível
-├── app.py                        # interface Streamlit (chat + painel de verificação)
-├── src/
-│   ├── config.py                 # modelos, caminhos, modo offline
-│   ├── llm.py                    # OpenAI quando há chave; modelo dummy roteirizado e embeddings fake sem chave
-│   ├── data.py                   # carga do CSV da CEAP em SQLite, ferramenta SQL com guardrails, índice FAISS
-│   ├── tools.py                  # ferramentas: API da Câmara (paginada), Brasil API, estatísticas; cache em fixtures
-│   ├── prompts.py                # prompt PTCF, few-shot, roteador, templates
-│   ├── chains.py                 # fases 1-3: LCEL, @chain, roteamento, sequencial/paralela, parser com reparo, callbacks, NLU
-│   ├── memory.py                 # memória CoALA: checkpointer, poda, memória episódica
-│   ├── rag.py                    # retriever open-box (scores), query transformation, diagnóstico
-│   ├── verification.py           # claims (Pydantic), fonte autoritativa a partir da trajetória, fact-check, NLI
-│   ├── evaluation.py             # casos de teste, avaliadores de trajetória/valor/juiz, execução local e LangSmith
-│   └── agent.py                  # montagem do agente integrador (create_agent + MemorySaver)
-├── scripts/
-│   ├── download_data.py          # baixa o CSV anual da CEAP e monta o SQLite
-│   └── record_fixtures.py        # grava respostas reais das APIs para o modo offline
-├── notebooks/                    # um notebook executado por fase (01 a 05)
-├── tests/                        # pytest: ferramentas, SQL, agente multi-turno, memória, verificação (roda offline)
-├── data/normas/                  # Ato da Mesa 43/2009 consolidado (versionado); CSV e SQLite ficam fora do git
-├── indices/                      # índice FAISS salvo (fase 2) e reaproveitado (fase 4)
-├── fixtures/                     # respostas gravadas das APIs (modo offline)
-└── docs/                         # plano, enunciado, dataset de avaliação, relatório
-```
-
-## Como rodar
-
-O ambiente é gerenciado por [devbox](https://www.jetify.com/devbox) (fixa Python 3.12 e `uv` via Nix) e por [uv](https://docs.astral.sh/uv/) (ambiente virtual e lockfile). Com o devbox instalado:
+## Preparar e abrir
 
 ```bash
-devbox shell                    # instala Python 3.12 + uv e roda `uv sync` (cria .venv a partir do uv.lock)
-cp .env.example .env            # preencha OPENAI_API_KEY e, opcionalmente, LANGCHAIN_API_KEY
-
-devbox run data                 # baixa o CSV da CEAP (≈75 MB) e monta o SQLite (209 mil despesas de 2025)
-devbox run index                # monta o índice FAISS do Ato da Mesa (data/normas/ato_mesa_43_2009.txt)
-devbox run fixtures             # grava respostas reais das APIs para o modo offline
-devbox run app                  # abre o Streamlit
-devbox run notebook             # abre o Jupyter Lab em notebooks/
-devbox run test                 # pytest em modo offline
-devbox run lint                 # ruff
+devbox run setup
+devbox run app
 ```
 
-Para reexecutar os notebooks do zero com as saídas gravadas:
+Abra http://localhost:8501. O setup instala as dependências, preserva o `.env` existente, prepara os anos ausentes da CEAP entre 2018 e 2026, migra o catálogo, carrega CEIS/CNEP e constrói o índice quando há chave OpenAI e modo online. Fontes já publicadas são reaproveitadas. Logs ficam em `logs/setup/`.
+
+Configure `OPENAI_API_KEY` e `MODO_OFFLINE=false` no `.env`. LangSmith é opcional para uso cotidiano e necessário para produzir a evidência de avaliação escolhida para a entrega. CEIS/CNEP locais não exigem chave CGU.
+
+Para atualizar apenas as sanções:
 
 ```bash
-for n in notebooks/0*.ipynb; do uv run jupyter nbconvert --to notebook --execute --inplace "$n"; done
+devbox run sancoes
 ```
 
-Sem devbox, basta ter Python 3.12 e `uv`: `uv sync && uv run streamlit run app.py`. As dependências e versões exatas estão em `pyproject.toml` e `uv.lock`.
+A carga real depende de acesso aos servidores oficiais. Sem uma base preparada, a ferramenta informa indisponibilidade e não conclui ausência de sanções.
 
-### Modo offline (avaliação sem nenhuma chave)
+## Testar
 
-Sem `OPENAI_API_KEY`, ou com `MODO_OFFLINE=true`, o projeto roda inteiro com alternativas dummy, como pede o enunciado:
+```bash
+devbox run test
+devbox run validate
+```
 
-- **LLM:** `ChatRoteirizado` (`src/llm.py`), um modelo determinístico que escolhe ferramentas por regras e formata as observações. Serve para demonstrar o ciclo ReAct, a memória por thread, o Streamlit e os testes.
-- **Embeddings:** `DeterministicFakeEmbedding` (o índice FAISS é construído, mas a busca não é semântica).
-- **APIs:** as ferramentas leem as respostas gravadas em `fixtures/` (chave = hash de URL + parâmetros).
+O primeiro comando executa os testes automatizados. O segundo executa o roteiro de aceitação sobre o banco configurado, com modelo roteirizado e fixtures de cadastro empresarial; salva `entregaveis/validacao-nucleo.json`. Compara valores com consultas de referência do próprio banco. Carga de sanções ausente aparece como pendência, não como sucesso de consulta. A recuperação offline não mede a qualidade semântica do LLM online.
 
-O banco SQLite é real nos dois modos (`devbox run data`). Com a chave da OpenAI, basta remover `MODO_OFFLINE` do `.env`: o código é o mesmo.
+Para testar com o modelo real e a BrasilAPI, com rede e chave configuradas:
 
-### Casos de teste
+```bash
+devbox run validate-online
+```
 
-Tabata Amaral (PSB-SP, id 204534) e Nikolas Ferreira (PL-MG, id 209787) em 2025, o homônimo "Silva", a média do PSB com combustível, o limite da cota em SP e fornecedores por CNPJ. O dataset com ferramentas esperadas e valores de referência está em `docs/dataset_avaliacao.json`.
+Essa execução consome a API OpenAI e gera `entregaveis/validacao-nucleo-online.json`. Falha de conexão é registrada; não há substituição silenciosa pelo modo offline. A avaliação de respostas e trajetórias no LangSmith pode ser executada dentro de `devbox shell`:
 
-Divergência conhecida: a API da Câmara (ao vivo) e o CSV anual (baixado em 07/11/2026) não batem para o mesmo deputado e ano (Tabata Amaral 2025: R$ 530.231,55 na API, R$ 504.994,08 no CSV). O agente sempre declara a fonte e não mistura as duas numa mesma conta.
+```bash
+uv run python scripts/evaluate_mandato.py --online --langsmith
+```
 
-## Fontes de dados
+### Conversa sugerida
 
-| Fonte | Uso | Acesso |
-|---|---|---|
-| [API de Dados Abertos da Câmara](https://dadosabertos.camara.leg.br/swagger/api.html) | deputados, despesas por período, partidos | pública, sem chave |
-| [CSV anual da CEAP](https://www.camara.leg.br/cota-parlamentar/) | agregações em SQL (média por partido, ranking de fornecedores) | download |
-| [Ato da Mesa 43/2009](https://www2.camara.leg.br/legin/int/atomes/2009/atodamesa-43-21-maio-2009-588364-normaatualizada-cd-mesa.html) (texto consolidado) | RAG: o que a cota pode pagar, limites por UF, prazos | site da Câmara, versionado em `data/normas/` |
-| [Brasil API](https://brasilapi.com.br/docs#tag/CNPJ) | dados do fornecedor por CNPJ | pública, sem chave |
+1. “Quanto Tabata Amaral gastou com combustível em 2025?”
+2. “E em 2024?”
+3. Em nova apuração: “Qual deputado mais gastou com combustível nos últimos 5 anos?”
+4. “Quanto ele gastou por ano?”
+5. “Quais os maiores fornecedores dele?”
+6. Escolha um CNPJ da resposta: “Consulte o cadastro deste CNPJ.”
+7. “Quem são os sócios dessa empresa?” — usa o CNPJ selecionado; a consulta pode não informar o quadro.
+8. “Essa empresa aparece no CEIS ou CNEP?”
+9. Em nova apuração: “A cota pode pagar hospedagem em Brasília?”
 
-## Uso de IA generativa
+Confira identidade, período, soma, fonte e data das sanções. A ausência de dados não equivale a gasto zero ou regularidade.
 
-Este projeto foi desenvolvido com apoio de assistentes de IA (Claude, da Anthropic) para planejamento, escrita de código e revisão de texto. Todo o código foi revisado e executado pelo autor. Detalhes no relatório técnico.
+## Demonstração sem chaves
 
-## Autor
+```bash
+devbox run demo
+```
 
-Igor Laltuf — [Fiquem Sabendo](https://fiquemsabendo.com.br)
+O comando prepara `data/demo/apuramandato.db` com amostra CEAP e sanções sintéticas. Dentro do Devbox:
+
+```bash
+MODO_OFFLINE=true APURAMANDATO_DB="$PWD/data/demo/apuramandato.db" uv run streamlit run app.py
+```
+
+O modo roteirizado serve para demonstrar a execução sem credenciais, não para comprovar qualidade do LLM ou HTTP real. A aplicação identifica os dados de demonstração. O roteiro completo de vários anos usa o banco de produção; a amostra não tem a mesma cobertura.
+
+## Arquitetura e requisitos
+
+Um agente único integra SQL somente leitura, RAG, API empresarial, cálculos e memória. A checagem recalcula os valores no mesmo recorte; não constitui auditoria independente nem certificação legal. O histórico curto usa checkpointer por sessão; resumos salvos explicitamente formam memória episódica em SQLite.
+
+Os notebooks 01–05 documentam as fases acadêmicas, incluindo chain estruturada, LCEL, comparação de orquestradores, ferramentas, memória, RAG e avaliação. O notebook 06 demonstra o núcleo atual. APIs antigas do enunciado são explicadas por equivalência com `create_agent` e os componentes atuais, conforme as orientações consolidadas da disciplina.
+
+Consulte [arquitetura](docs/ARQUITETURA.md), [rubricas](docs/ENUNCIADO_E_RUBRICAS.md), [relatório](docs/RELATORIO.md) e [roteiro de demonstração](docs/ROTEIRO_DEMONSTRACAO.md). As execuções online mais recentes passaram no núcleo (9/9) e na investigação (14/14). A avaliação online e o link do experimento estão no relatório. O vídeo pessoal ainda precisa ser anexado; fixtures não substituem HTTP real.
+
+## Administração e extensão preservada
+
+Dentro de `devbox shell`, os importadores continuam disponíveis:
+
+```bash
+uv run python scripts/load_sources.py catalogo
+uv run python scripts/load_sources.py ceis --arquivo /caminho/CEIS.csv --data 2026-11-13
+uv run python scripts/load_sources.py cnep --arquivo /caminho/CNEP.csv --data 2026-11-13
+uv run python scripts/setup_project.py --ampliado
+```
+
+Use a data real do snapshot. O modo ampliado prepara TSE, emendas, favorecidos e identidades. A biblioteca permite `montar_agente(escopo_ampliado=True)` para experimentos, mas a interface permanece no núcleo principal. Esses importadores não são necessários para demonstrar o fluxo acadêmico selecionado.
+
+**Fontes:** [CEAP](https://www.camara.leg.br/cotas/), [CEIS](https://portaldatransparencia.gov.br/download-de-dados/ceis), [CNEP](https://portaldatransparencia.gov.br/download-de-dados/cnep), [BrasilAPI](https://brasilapi.com.br/docs).
+
+
+## Teste da investigação completa e dos riscos
+
+```bash
+devbox run investigate-test
+devbox run investigate-online
+```
+
+O ensaio completo acompanha 14 etapas: dez maiores fornecedores de Tabata em 2024–2026, evolução dos três primeiros, categorias, concentração, cadastro, sócios, outros deputados, participação na CEAP, sanções, limites sobre faturamento/corrupção, regras, mudança de período e ambiguidade. Os valores são comparados com consultas SQL separadas sobre o mesmo banco; não é auditoria independente da fonte. O modo offline usa o cadastro gravado, sem comprovar HTTP ou atualidade dos sócios. O modo online exige chave e rede e desativa o cache HTTP.
+
+Resultados em `entregaveis/investigacao-completa.json`, `entregaveis/investigacao-completa-online.json` e `entregaveis/testes-investigacao.xml`. A investigação usa ações tipadas com ID, CNPJ e anos explícitos. A concentração inclui todas as despesas do deputado no denominador, mesmo quando o ranking é de empresas. A participação de uma empresa considera somente o universo CEAP e não representa seu faturamento. Listas limitadas são sinalizadas e não alteram os agregados globais.
+
+## Entrega acadêmica
+
+Consulte [instruções de entrega](docs/ENTREGA.md). O relatório registra os resultados e apresenta os links e evidências de avaliação. HTMLs e materiais auxiliares de apresentação ficam fora do repositório.

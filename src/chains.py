@@ -19,9 +19,9 @@ from langchain_core.messages import BaseMessage
 from langchain_core.output_parsers import PydanticOutputParser, StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables import Runnable, RunnableLambda, RunnableParallel, RunnablePassthrough, chain
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
-from src import llm, prompts, tools
+from src import config, llm, prompts, tools
 
 
 # --------------------------------------------------------------------------- #
@@ -40,6 +40,12 @@ class PedidoApuracao(BaseModel):
     dado_faltante: str | None = Field(
         default=None, description="Campo obrigatorio ausente para executar o pedido (ex: 'deputado')."
     )
+
+    @model_validator(mode="after")
+    def validar_periodo_anual(self):
+        if self.deputado and self.ano and self.dado_faltante in {"mes", "mês", "partido", "uf"}:
+            self.dado_faltante = None
+        return self
 
 
 def chain_normalizar_nome() -> Runnable:
@@ -116,10 +122,12 @@ def chain_roteador() -> Runnable:
 
 
 def _responder_conversa(entrada: dict) -> str:
-    return "Sou o ApuraCota. Pergunte sobre gastos da cota parlamentar de um deputado, comparacoes ou regras."
+    return (
+        "Sou o ApuraMandato. Pergunte sobre gastos da cota parlamentar de um deputado, comparacoes ou regras."
+    )
 
 
-def _despesas_por_pedido(pedido: PedidoApuracao) -> dict:
+def _despesas_por_pedido(pedido: PedidoApuracao, comparacao: bool = False) -> dict:
     """Etapa determinista da chain sequencial: resolve nome -> id -> despesas."""
     if not pedido.deputado:
         return {"erro": "deputado nao informado"}
@@ -131,15 +139,23 @@ def _despesas_por_pedido(pedido: PedidoApuracao) -> dict:
     args = {"id_deputado": id_dep, "ano": pedido.ano or 2025}
     if pedido.categoria:
         args["categoria"] = pedido.categoria
-    return {"deputado": linhas[0], **json.loads(tools.listar_despesas.invoke(args))}
+    if comparacao:
+        from src.data import despesas_individuais_locais
+
+        resultado = despesas_individuais_locais(id_dep, pedido.ano or 2025, None, pedido.categoria)
+    else:
+        resultado = tools.listar_despesas.invoke(args)
+    return {"deputado": linhas[0], **json.loads(resultado)}
 
 
 def _formatar_despesas(r: dict) -> str:
     if "erro" in r:
         return f"Nao foi possivel apurar: {r['erro']} {r.get('opcoes', '')}".strip()
+    if r["total_valor"] is None:
+        return f"Nenhum lançamento encontrado. Fonte: {r['fonte']}."
     from src.llm import _brl
 
-    return f"{r['deputado']}: {_brl(r['total_valor'])} em {r['ano']} ({r['total_registros']} lancamentos). Fonte: API da Camara."
+    return f"{r['deputado']}: {_brl(r['total_valor'])} em {r['ano']} ({r['total_registros']} lancamentos). Fonte: {r.get('fonte', 'API da Camara')}."
 
 
 def chain_sequencial() -> Runnable:
@@ -171,7 +187,8 @@ def chain_paralela() -> Runnable:
         {"pergunta": RunnablePassthrough()}
         | chain_pedido()
         | RunnableParallel(
-            despesas=RunnableLambda(_despesas_por_pedido) | RunnableLambda(_formatar_despesas),
+            despesas=RunnableLambda(lambda pedido: _despesas_por_pedido(pedido, comparacao=True))
+            | RunnableLambda(_formatar_despesas),
             media_partido=RunnableLambda(media_partido),
         )
     )
@@ -284,3 +301,31 @@ def analisar_turno(historico: list[BaseMessage], mensagem: str) -> AnaliseNLU:
             if analise.deputado and analise.dado_faltante == "deputado":
                 analise.dado_faltante = None
     return analise
+
+
+class PedidoInvestigacao(BaseModel):
+    """Contrato de interpretação dos três domínios do ApuraMandato."""
+
+    dominio: Literal["ceap", "emendas", "eleitoral", "fornecedor", "cruzamento"]
+    pessoa: str | None = None
+    cnpj: str | None = None
+    anos: list[int] = Field(default_factory=list)
+    medida: str | None = Field(
+        default=None,
+        description="Pago/empenhado/liquidado, patrimônio, receita ou despesa; não misturar medidas.",
+    )
+    categoria: str | None = None
+    pergunta_esclarecimento: str | None = None
+
+
+def chain_investigacao() -> Runnable:
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            (
+                "system",
+                "Identifique domínio, sujeito, anos e medida da investigação. Emendas sem medida exigem esclarecimento. Não resolva identidades por semelhança de nomes. Não assuma 2025. Data de referência: {hoje}.",
+            ),
+            ("human", "{pergunta}"),
+        ]
+    ).partial(hoje=config.HOJE)
+    return prompt | llm.chat_model().with_structured_output(PedidoInvestigacao)

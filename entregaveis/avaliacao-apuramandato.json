@@ -1,0 +1,66 @@
+{
+  "executado_em": "2026-11-14T01:27:52.523511+00:00",
+  "modo": "online",
+  "banco": "/home/laltuf/Infnet/projeto-agentes-langchain/data/ceap.db",
+  "status": "EXECUTADO",
+  "resultados": [
+    {
+      "caso": "gasto_categoria_local",
+      "resposta": "A deputada Tabata Amaral gastou um total de R$ 48.808,83 com combustíveis em 2025. \n\nFonte",
+      "trajetoria_correta": 1,
+      "valor_correto": 1,
+      "juiz_llm": 1
+    },
+    {
+      "caso": "gasto_total_local",
+      "resposta": "O gasto total do deputado Nikolas Ferreira em 2025 foi de R$ 389.263,25. \n\nFonte: Cota par",
+      "trajetoria_correta": 1,
+      "valor_correto": 1,
+      "juiz_llm": 1
+    },
+    {
+      "caso": "media_partido_sql",
+      "resposta": "A média de gasto com combustível por deputado do PSB em 2025 foi de R$ 48.849,91. \n\nFonte:",
+      "trajetoria_correta": 1,
+      "valor_correto": 1,
+      "juiz_llm": 1
+    },
+    {
+      "caso": "homonimos",
+      "resposta": "Encontrei várias opções de deputados com o nome \"Silva\":\n\n1. Benedita da Silva - PT-RJ (ID",
+      "trajetoria_correta": 1,
+      "valor_correto": null,
+      "juiz_llm": 1
+    },
+    {
+      "caso": "regra_rag",
+      "resposta": "O limite mensal da cota para um deputado de São Paulo (SP) é de R$ 42.837,33. \n\nFonte: Ato",
+      "trajetoria_correta": 1,
+      "valor_correto": 1,
+      "juiz_llm": 1
+    },
+    {
+      "caso": "fornecedor_api",
+      "resposta": "O fornecedor do CNPJ 33.927.528/0001-60 é a empresa **SJR IMÓVEIS LTDA**, que está ativa e",
+      "trajetoria_correta": 1,
+      "valor_correto": null,
+      "juiz_llm": 1
+    },
+    {
+      "caso": "sancoes_locais",
+      "resposta": "Não encontrei sanções registradas para o CNPJ 33.927.528/0001-60 nas bases do Cadastro Nac",
+      "trajetoria_correta": 1,
+      "valor_correto": null,
+      "juiz_llm": 1
+    },
+    {
+      "caso": "escopo_eleitoral",
+      "resposta": "Não tenho acesso a informações sobre bens declarados, patrimônio ou doações de campanha. M",
+      "trajetoria_correta": 1,
+      "valor_correto": null,
+      "juiz_llm": 1
+    }
+  ],
+  "dataset": "apuramandato-v1-online-4f53cda1",
+  "langsmith": "<ExperimentResults apuramandato-56ace0e5>"
+}

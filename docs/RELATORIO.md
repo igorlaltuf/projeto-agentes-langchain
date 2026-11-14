@@ -1,138 +1,136 @@
-# ApuraCota: agente cognitivo para apuração de gastos parlamentares (CEAP)
+# ApuraMandato — agente cognitivo de investigação de gastos parlamentares
 
-**Disciplina:** Agentes Cognitivos com LangChain (Infnet, 2026) · **Professor:** Gabriel Caldas
-**Aluno:** Igor Laltuf · **Repositório:** https://github.com/igorlaltuf/projeto-agentes-langchain
-**Arquivo final:** `igor_laltuf_ai-agents_langchain-agents.pdf`
+**Aluno:** Igor Laltuf. **Disciplina:** Agentes Cognitivos com LangChain, Infnet. **Professor:** Gabriel Caldas. **Versão:** núcleo simplificado, 13/11/2026. **PDF:** `igor_laltuf_ai-agents_langchain-agents.pdf`.
 
-> Esqueleto do relatório. Os blocos marcados com `[PENDENTE: ...]` dependem da execução com `OPENAI_API_KEY`/`LANGCHAIN_API_KEY` (saídas online dos notebooks, índice FAISS real, prints do LangSmith e do Streamlit). Todo o resto já reflete o código versionado.
+## 1. Problema, domínio e escopo
 
-## 1. Definição do problema
+O ApuraMandato ajuda cidadãos e repórteres a investigar despesas da cota parlamentar, conhecer fornecedores e consultar registros de sanções, com explicações baseadas nas normas. O percurso escolhido é gastos → fornecedores → cadastro → sanções. Esse recorte mantém uma tarefa investigativa coerente sem exigir resolver identidades entre eleições, mandatos e autores de emendas durante a conversa.
 
-Repórteres que cobrem o Congresso precisam responder perguntas factuais sobre a Cota para o Exercício da Atividade Parlamentar (CEAP) com rapidez e fonte: quanto um deputado gastou em uma categoria, se o valor está acima da média do partido, quem são os fornecedores, e se a despesa é permitida pelas regras da cota. Hoje isso exige cruzar três fontes distintas (API da Câmara, CSV anual de 200 mil linhas e o Ato da Mesa 43/2009). O ApuraCota é um agente conversacional que faz esse cruzamento sob demanda, decide sozinho a fonte adequada, mantém o contexto da apuração e verifica os próprios números antes de responder.
+O agente único é híbrido: o LLM escolhe ferramentas em um ciclo ReAct; consultas, cálculos e verificações são determinísticos. Uma tarefa complexa é decomposta em identificar o parlamentar e o período, obter o agregado, detalhar os anos, selecionar fornecedores e consultar cadastro/sanções. A confirmação de uma etapa fornece o contexto da próxima.
 
-## 2. Caracterização do domínio
+Os testes do escopo anterior identificaram problemas distintos: autorização de dependências de views, cobertura temporal compartilhada indevidamente entre fontes, consulta eleitoral interrompida e falhas de intenção no modo roteirizado. TSE, emendas, favorecidos e seus importadores foram preservados como extensão administrativa. O fluxo principal e o setup não dependem deles. Nenhuma rubrica exige uma quantidade mínima de bases.
 
-- **CEAP:** reembolso mensal de despesas do mandato, com limites por UF (de R$ 36.582,46 no DF a R$ 51.406,33 em RR) e categorias fixas (combustíveis, passagens, divulgação, escritório etc.).
-- **Fontes:** API de Dados Abertos da Câmara (ao vivo, exige `idLegislatura` junto do ano, paginada em 100 itens); CSV anual oficial (2025: 209.081 despesas, 562 deputados, R$ 240,3 milhões; BOM UTF-8, CNPJ em formato não padrão); Ato da Mesa 43/2009 consolidado até o Ato 246/2026 (21 artigos + anexo de limites); Brasil API para CNPJ.
-- **Particularidades que o agente precisa tratar:** homônimos (seis deputados "Silva"), divergência entre API e CSV para o mesmo deputado/ano (Tabata Amaral 2025: R$ 530.231,55 vs R$ 504.994,08), vocabulário leigo vs jurídico nas regras ("hotel em Brasília" vs "hospedagem no Distrito Federal").
+## 2. Fontes e arquitetura
 
-## 3. Decisões técnicas por fase
+- **CEAP, Câmara dos Deputados:** gastos por parlamentar, ano, categoria, partido e fornecedor. A base de produção testada contém 2018–2026; o ano corrente é parcial. Identidade por ID da Câmara.
+- **Ato da Mesa nº 43/2009, na versão disponível:** fonte normativa para o RAG, sem presumir que um trecho antigo represente legislação atual sem conferir sua versão.
+- **BrasilAPI / Minha Receita:** cadastro empresarial por CNPJ completo validado. É a integração HTTP externa do agente; o cache pode ser desativado.
+- **CEIS e CNEP, CGU:** arquivos datados para consulta local de sanções pelo CNPJ exato, conservando categoria, datas, órgão, abrangência, fundamento e observações.
 
-### Fase 1: MVP (notebook 01)
-- `PedidoApuracao` (Pydantic) como contrato entre pergunta livre e sistema; `with_structured_output` como caminho principal e `PydanticOutputParser` para o JSON explícito.
-- LCEL como padrão (batch, stream, tracing); `@chain` só onde há lógica condicional (pedir esclarecimento quando falta o deputado).
+Arquivos, SHA-256, lotes e referências de origem dão rastreabilidade. As sanções são publicadas transacionalmente por cadastro. Falhas preservam a versão anterior. O chat não baixa bases. A busca de deputados é local, inclusive para anos recentes. Não há fallback para uma API de despesas quando falta cobertura.
 
-### Fase 2: agente ReAct (notebook 02)
-- Ferramentas com `@tool` + `args_schema`; APIs reais via `httpx` com cache em fixtures.
-- `create_agent` + `MemorySaver`; roteamento com chain classificadora + `RunnableLambda`; `RunnableParallel` para API e SQL simultâneos.
-- Prompt PTCF, few-shot com caso ambíguo, chain-of-thought em uma linha.
-- Confiabilidade: parser com chain de reparo, `trim_messages`, FAISS salvo com `save_local`, `LogCallbackHandler`.
+Ausência de sanção é limitada à versão consultada e não certifica regularidade. A data final não basta para inferir vigência; a categoria e o fundamento importam. Documentos mascarados ou nomes semelhantes não confirmam identidades. Os valores de multas não são somados às despesas parlamentares.
 
-### Fase 3: memória (notebook 03)
-- Taxonomia CoALA aplicada (tabela na seção 3.1 do notebook). Memória episódica com filtro por repórter; sumarização grava na episódica; busca vetorial recupera.
-- Decisão: memória custom em vez de Mem0/Letta, por governança dos dados de apuração.
-- NLU com `MessagesPlaceholder` e campo `herdado_do_historico`; conversa de cinco turnos sem repetir entidades.
+A arquitetura está documentada em `docs/ARQUITETURA.md`. A interface principal apresenta a página inicial e o chat; a página de metodologia foi removida.
 
-### Fase 4: ferramentas e RAG (notebook 04)
-- Text-to-SQL com guardrails (só SELECT, LIMIT forçado, auditoria impressa).
-- Índice FAISS carregado com `load_local` e exposto por `create_retriever_tool`.
-- Diagnóstico open-box (chunk_id, score L2) e query transformation. Com `text-embedding-3-small`, a pergunta "A cota pode pagar hotel em Brasília?" não recupera o trecho sobre o Distrito Federal (top-3 com L2 0,915 a 0,943); reescrita para "A cota pode custear hospedagem no Distrito Federal?" traz o § 3º do art. 2º em primeiro (L2 0,894). A melhora é pequena em distância, mas muda o acerto do retriever.
+## 3. Desenvolvimento pelas cinco fases
 
-### Fase 5: integrador, verificação, Streamlit, avaliação (notebook 05)
-- Agente único com cinco categorias de ferramenta.
-- Verificação em três etapas dentro do turno: extração de claims → fact-check determinístico contra o SQLite (consultas derivadas da trajetória) → NLI.
-- Streamlit com trajetória e painel de verificação. `[PENDENTE: print da interface]`
-- Avaliação com três avaliadores (trajetória, valor, juiz LLM), local e no LangSmith. Números e links na seção 5. `[PENDENTE: print do experimento no LangSmith]`
+### Fase 1 — chain executável
 
-## 4. Mapa das 29 rubricas
+Os templates de normalização e de pedido de apuração usam PromptTemplate e ChatPromptTemplate. Pydantic e output parsers estruturam intenção, deputado, ano, categoria e esclarecimentos. A interface Runnable fornece invoke/batch e composição. Os notebooks comparam a forma imperativa decorada e LCEL; LCEL é adotada para composição declarativa, enquanto funções Python preservam o controle dos cálculos e validações.
 
-| Rubrica | Onde está | Nota |
+### Fase 2 — agente e ferramentas
+
+A comparação de orquestradores considera autonomia, abstração e modularidade. LangChain/LangGraph mantém ferramentas tipadas e controle do ciclo, adequado a um agente que escolhe SQL, RAG ou cadastro. O prompt PTCF define persona, tarefa, contexto e formato. O notebook 02 demonstra exemplos few-shot; esses exemplos didáticos não são automaticamente inseridos em toda chamada do chat principal. O planejamento é exposto por decisões e trajetórias, sem exigir divulgação de raciocínio interno.
+
+As ferramentas incluem busca de deputados, despesas individuais, SQL de agregações, cadastro de CNPJ, sanções locais, cálculos, recuperação e memória. Parsers, validação de documentos, retornos estruturados de indisponibilidade e callbacks tornam as falhas observáveis. Uma falha de cadastro ou de cobertura não encerra a conversa nem fabrica dados.
+
+### Fase 3 — memória
+
+O checkpointer por sessão oferece memória curta, com janela limitada de tokens. Memória episódica persiste resumos solicitados pelo usuário; documentos recuperáveis formam memória semântica e prompts/ferramentas memória procedural, seguindo CoALA. A comparação de ferramentas especializadas considera persistência, recuperação e controle do ciclo antes da escolha de uma solução explícita e pequena.
+
+“E em 2024?” preserva deputado e categoria. Ranking e detalhamento anual mantêm ID, filtro e intervalo. Listas de fornecedores exigem seleção quando houver várias empresas. Sessões não compartilham histórico de curto prazo. A recuperação de resumos não substitui nova consulta dos valores quando necessária.
+
+### Fase 4 — SQL, API e RAG
+
+Text-to-query lê exclusivamente despesas CEAP, valida os anos solicitados e limita linhas. Datas são extraídas dos filtros de ano, evitando interpretar números de fornecedor ou valores financeiros como anos. A extensão SQL mantém proteção de tabelas e corrige a autorização de dependências internas das views; a cobertura temporal é associada à fonte.
+
+A BrasilAPI é consultada por function calling. CNPJ inválido, documento retornado divergente, ausência de fixture ou erro HTTP resultam em indisponibilidade. As fixtures permitem avaliação sem credenciais, mas não comprovam integração online real.
+
+O RAG usa FAISS existente e o documento normativo. Um teste offline de hospedagem em Brasília recuperava trechos irrelevantes e perdia a exceção. A correção complementa os candidatos semânticos com termos exatos ponderados por frequência e normaliza Brasília para Distrito Federal. O teste passou a recuperar “hospedagem, exceto do parlamentar no Distrito Federal”, com referência ao Ato. A retenção de siglas curtas de UF também corrigiu a recuperação do limite mensal de SP. Isso demonstra falhas de recuperação e suas correções, sem atribuir aos embeddings falsos qualidade semântica de produção.
+
+### Fase 5 — integração, checagem e avaliação
+
+Um executor integra as ferramentas e a interface Streamlit. A auditoria extrai afirmações, reexecuta referências SQL e compara números com tolerância de centavos. Contexto semântico como pessoa e ano é preservado; IDs técnicos não são exigidos na prosa para confirmar uma pessoa. O detalhamento anual tem referências por ano e uma referência separada para a soma.
+
+A checagem é de consistência com a mesma fonte, não uma auditoria independente nem certificação da legalidade do gasto. A análise de coerência usa um modelo separado quando online. Offline, o julgamento semântico é indisponível, sem nota fabricada.
+
+O conjunto padrão de avaliação foi reduzido ao núcleo. A trajetória e o valor são avaliados deterministicamente; LLM-as-a-judge e LangSmith dependem de acesso aos serviços. O roteiro `scripts/validate_core.py` testa nove passos com referências do banco configurado e separa falha, sucesso e carga pendente. Offline usa modelo roteirizado e cadastro de teste; online executa modelo real e não faz fallback silencioso.
+
+## 4. Rubricas e equivalências
+
+| Rubricas | Evidência |
+|---|---|
+| 1.1–1.5 | Anatomia, classificação, planejamento hierárquico, templates, JSON, Runnable, composição imperativa e LCEL no notebook 01 e código de chains. |
+| 2.1–2.6 | Comparação de orquestradores, ciclo ReAct, ferramentas, roteamento, PTCF, exemplos, parsers, callbacks, memória e FAISS nos notebooks 02 e seguintes. A execução online do núcleo confirma cadastro empresarial com cache desativado. |
+| 3.1–3.6 | Taxonomia CoALA, comparação de memória, janela de contexto, memória curta/longa, intenção e conversas multi-turno no notebook 03 e roteiro de aceitação. As execuções online do núcleo e da investigação registram continuidade multi-turno. |
+| 4.1–4.5 | Distinção entre funções determinísticas e semânticas, API empresarial, SQL, FAISS e diagnóstico da recuperação no notebook 04 e testes do núcleo. |
+| 5.1–5.6 | Verificação, agente único, histórico, Streamlit, avaliação de qualidade/trajectória e LangSmith no notebook 05 e integração 06. Experimento online publicado; vídeo pessoal ainda precisa ser anexado. |
+
+O enunciado usa APIs antigas, como initialize_agent, AgentExecutor e ConversationBufferMemory. O guia consolidado das aulas aceita equivalentes atuais: create_agent sobre LangGraph implementa o ciclo com ferramentas, o checkpointer conserva o histórico por sessão e Runnables implementam composição/roteamento. Os conceitos e justificativas permanecem evidenciados; a simplificação do domínio não remove essas capacidades.
+
+## 5. Resultados, reprodução e pendências
+
+A suíte final passou com 216 testes, com zero falhas e zero erros (`entregaveis/testes-finais.xml`). A avaliação offline registrou trajetória correta nos oito casos e valores corretos nos quatro casos numéricos. O roteiro de aceitação passou em nove etapas. Os resultados atuais ficam em `entregaveis/validacao-nucleo.json` e `entregaveis/avaliacao-nucleo-offline.json`; não devem ser confundidos com métricas online. No banco de produção, gastos individuais, troca curta de ano, ranking, detalhamento e fornecedores foram exercitados. O total de combustível do primeiro colocado em 2022–2026 foi R$ 454.209,18; a soma anual conferiu e a auditoria reconheceu cada parcela e o total.
+
+`devbox run test` executa regressões. `devbox run validate` testa o fluxo offline. `devbox run validate-online` testa o modelo real e a API externa. `devbox run sancoes` prepara ou atualiza CEIS/CNEP; `devbox run setup` prepara somente o núcleo padrão. A amostra de demonstração é isolada e identificada como tal.
+
+As execuções online mais recentes substituem as tentativas anteriores indisponíveis: o núcleo passou em nove etapas e a investigação completa em 14. A avaliação online também foi concluída e o experimento foi publicado no LangSmith. A gravação pessoal e seu link acessível continuam pendentes. O roteiro está em `docs/ROTEIRO_DEMONSTRACAO.md`.
+
+## 6. Uso de IA e limitações
+
+O desenvolvimento contou com OpenAI Codex/ChatGPT para assistência à implementação, revisão, documentação, testes e preparação dos entregáveis. Um artefato HTML do Claude fornecido pelo aluno foi usado como referência para um roteiro auxiliar de apresentação, mantido fora do repositório; não é evidência de execução. O próprio sistema usa modelos OpenAI para agente, embeddings e juiz, conforme configuração. A responsabilidade pelas decisões, conferência dos dados e apresentação é do aluno. Limitações incluem cobertura e atualização das fontes, documentos normativos versionados, erros cadastrais, interpretação do LLM, classificação incompleta de afirmações e diferença entre teste roteirizado e conversa online.
+
+A próxima disciplina pode reintroduzir dados eleitorais e emendas com arquitetura própria e avaliação separada. Nesta entrega, o núcleo prioriza uma investigação curta, verificável e reproduzível.
+
+
+## Correção de continuidade societária
+
+A consulta cadastral passou a preservar o quadro de sócios/administradores. A continuação usa o CNPJ do ranking ou o recupera por nome exato e único na CEAP, sem aceitar um documento inventado pelo modelo. A indisponibilidade não é convertida em ausência de sócios, e o cadastro atual não é atribuído automaticamente a pagamentos históricos. Testes controlados usam quadros sintéticos; os roteiros online mais recentes também exercitaram cadastro real e continuidade sobre sócios.
+
+O caso FAROL também revelou período inconsistente na conversa relatada: o total de R$ 363.000,00 soma registros de 2020–2025; no recorte 2024–2026, a soma local foi R$ 103.000,00. Agregações sem filtro de ano são agora rejeitadas e argumentos de anos incompatíveis com o SQL são bloqueados. A correção impede publicar um total histórico como se pertencesse a um intervalo menor.
+
+
+## Investigação completa e situações adversariais
+
+O roteiro de 14 etapas foi executado em modo roteirizado sobre a CEAP real, com referências SQL separadas: ranking de fornecedores de Tabata em 2024–2026, evolução, categorias, concentração, cadastro, sócios, outros deputados, participação na CEAP, sanções, limites de conclusão, regras, alteração de período e ambiguidade. Cadastro e QSA foram exercitados com resposta gravada da BrasilAPI, sem alegar consulta HTTP atual. As fontes CEIS/CNEP presentes na produção tinham referência de 13/11/2026, com 23.667 e 1.845 registros respectivamente.
+
+O ensaio encontrou lacunas de roteamento e cálculos no fluxo anterior. Foram introduzidas ações tipadas que preservam ID, CNPJ, anos e categoria. O denominador da concentração inclui todas as despesas do deputado no recorte; o da participação contém o universo CEAP do mesmo CNPJ, sem alegar faturamento total. A reexecução confere a apresentação estruturada e distingue esse procedimento de NLI por modelo.
+
+Os três maiores fornecedores somaram R$ 465.844,75 de R$ 1.368.536,48 nas despesas do recorte, correspondendo a 34,04%. Os anos de 2024–2026 são explicitados, com 2026 parcial. Esses valores se referem à versão carregada e não representam prova de irregularidade.
+
+Os testes adversariais incluem empresas de mesmo nome e documentos distintos, matriz/filial, máscara de documento, mudança de período, nova pessoa ambígua, seleção entre empresas, quadro societário ausente/vazio, indisponibilidade de cadastro ou sanções, denominador zero, estornos, lista limitada, texto alterado e pedidos de conclusão sobre faturamento ou corrupção. Valores conhecidos em bases controladas evitam validar a lógica apenas contra si mesma. `testes-investigacao.xml` e `testes-investigacao-riscos.json` preservam a execução; `investigacao-completa.json` contém o fluxo sobre os dados reais. As tentativas antigas de conectividade não foram convertidas em aprovação; os arquivos online atuais registram execuções posteriores bem-sucedidas.
+
+
+## 7. Avaliação online final e evidências de entrega
+
+### Ambiente e comparação entre modos
+
+Versões verificadas no ambiente: Python 3.12, LangChain 1.4.9 e LangGraph 1.2.20. As dependências exatas estão em `uv.lock`. Modelos padrão: `gpt-4o-mini` (agente), `gpt-4o` (juiz) e `text-embedding-3-small` (embeddings), configuráveis por ambiente.
+
+| Execução | Resultado | Evidência |
 |---|---|---|
-| 1.1–1.6 | notebook 01, `src/chains.py`, `src/prompts.py` | |
-| 2.1 | notebook 02 (tabela de orquestradores) | |
-| 2.2 | `src/agent.py`, notebook 02 | **Equivalência:** `initialize_agent`/`ZERO_SHOT_REACT_DESCRIPTION` descontinuados → `create_agent` (mesmo ciclo ReAct sobre LangGraph) |
-| 2.3 | `src/chains.py` (roteador, sequencial, paralela) | **Equivalência:** `RouterChain`/`SequentialChain` legados → classificadora + `RunnableLambda`, LCEL e `RunnableParallel` |
-| 2.4 | `src/tools.py` (Câmara, Brasil API) | chamadas reais; fixtures como mock |
-| 2.5 | `src/prompts.py` | PTCF, few-shot, CoT |
-| 2.6 | `src/chains.py`, `src/memory.py`, `src/data.py` | parser com reparo, `trim_messages`, FAISS, callbacks |
-| 3.1–3.3 | notebook 03 | CoALA, janela de contexto, comparação Mem0/Letta/LangMem |
-| 3.4 | `src/memory.py`, notebook 03 | **Equivalência:** `ConversationBufferMemory` (legado) → `MemorySaver` + `thread_id` |
-| 3.5–3.6 | `src/chains.py` (`AnaliseNLU`), notebook 03 | conversa de cinco turnos |
-| 4.1–4.2 | notebook 04, `src/tools.py` | tabela por tipo; APIs classificadas |
-| 4.3 | `src/data.py` (`consultar_ceap`) | guardrails |
-| 4.4 | `src/data.py` (`carregar_indice`, `ferramenta_regras_cota`) | índice existente |
-| 4.5 | `src/rag.py`, notebook 04 | open-box + query transformation |
-| 5.1 | `src/verification.py`, `app.py` | dentro do turno |
-| 5.2 | `src/agent.py` | RAG + SQL + API + hardcoded + memória |
-| 5.3 | `src/agent.py` | **Equivalência:** `create_openai_tools_agent` + `AgentExecutor` → `create_agent` |
-| 5.4 | `src/agent.py`, `app.py` | **Equivalência:** `RunnableWithMessageHistory` → checkpointer por sessão |
-| 5.5 | `app.py` | opcional segundo o professor; implementado |
-| 5.6 | `src/evaluation.py`, notebook 05 | local + LangSmith (dataset `apuracota-casos`, 6 experimentos, `comparar_experimentos`) |
+| Aceitação do núcleo online | 9/9 etapas passaram | `entregaveis/validacao-nucleo-online.json` |
+| Investigação completa online | 14/14 etapas passaram | `entregaveis/investigacao-completa-online.json` |
+| Avaliação online de oito casos | Trajetória 8/8; valor 4/4 aplicáveis; juiz 8/8 | `entregaveis/avaliacao-apuramandato.json` e experimento LangSmith |
+| Avaliação offline de oito casos | Trajetória 8/8; valor 4/4; juiz não executado | `entregaveis/avaliacao-nucleo-offline.json` |
 
-## 5. Resultados de avaliação
+A avaliação online local tem horário registrado em `2026-11-14T01:27:52.523511+00:00`, equivalente a 13/11/2026 às 22:27:52 em Brasília. O dataset é `apuramandato-v1-online-4f53cda1`; o experimento é `apuramandato-56ace0e5`.
 
-Avaliação local offline (modelo dummy + fixtures), seis casos: trajetória correta em 6/6; valor correto em 2/4 casos numéricos (as falhas são do mock: resultado SQL bruto e embeddings fake), juiz LLM não executado.
+Experimento: [resultados de qualidade e trajetória no LangSmith](https://smith.langchain.com/o/d018734c-9bf1-40b6-b0d7-2c3d5d46f8fe/datasets/f2f36265-eb15-42b0-a7c6-b68e110a7aa6/compare?selectedSessions=f2ba6b0a-15a6-434b-8fbd-fa9ca9fe8e97).
 
-Avaliação local online (agente `gpt-4o-mini`, juiz `gpt-4o`, índice real), executada em 09/11/2026 no notebook 05:
+O acesso ao link pode exigir login e permissão na organização do LangSmith. Por isso, a entrega inclui o JSON local, além do link. O JSON local resume uma execução de avaliação; o envio ao LangSmith realiza outra execução dos mesmos casos. As notas publicadas no painel devem ser conferidas diretamente nele, sem presumir igualdade de textos entre execuções.
 
-| caso | trajetória | valor | juiz |
-|---|---|---|---|
-| gasto_categoria_api (Tabata, combustível 2025) | 1 | 1 | 1 |
-| gasto_total_api (Nikolas 2025) | 1 | 1 | 1 |
-| media_partido_sql (PSB combustível) | 1 | 1 | 1 |
-| homonimos ("Silva") | 1 | — | 1 |
-| regra_rag (limite SP) | 1 | 1 | 1 |
-| fornecedor_api (CNPJ) | 1 | — | 1 |
+Os oito casos cobrem gasto por categoria, gasto total, média por partido via SQL, homônimos, regra normativa com RAG, cadastro via API, sanções locais e recusa de consulta eleitoral fora do escopo. `trajetoria_correta` verifica a presença e ordem relativa das ferramentas esperadas e a ausência das proibidas; não exige igualdade exata de toda a sequência. `valor_correto` verifica se o número de referência aparece na resposta com tolerância de um centavo. `juiz_llm` compara resposta e referência. Casos sem valor numérico recebem `null` nesse critério e não entram no denominador 4/4.
 
-A primeira rodada online teve trajetória 5/6: no caso dos homônimos o agente respondeu de memória que "Silva" era ambíguo, sem chamar `buscar_deputado`, induzido pelo exemplo few-shot. A correção foi no prompt (regra "sempre chame a ferramenta antes de responder ou pedir esclarecimento"), e a rodada seguinte ficou em 6/6. A mesma rodada expôs um bug na chain paralela: o LLM extraía "combustível" (singular) e o filtro por substring não casava com "COMBUSTÍVEIS", devolvendo R$ 0,00 e média nula. A solução foi um normalizador de categoria (`src/tools.py`) usado pela ferramenta da API, pela chain SQL e pela verificação.
+A aprovação desses casos não comprova precisão universal. O juiz pode aprovar texto inadequado, e a extração de afirmações da checagem interna ainda pode classificar um total de categoria sob outro rótulo, deixando um valor correto como não verificado. A avaliação externa e a verificação interna são mecanismos distintos: nota 1 do juiz não implica que todos os itens do fact-check interno tenham sido confirmados.
 
-**Registro no LangSmith** (10/11/2026). Dataset `apuracota-casos` (6 exemplos): https://smith.langchain.com/o/d018734c-9bf1-40b6-b0d7-2c3d5d46f8fe/datasets/6501d508-7202-4e3e-b210-a61d17218b18. Seis experimentos sobre o mesmo dataset, três configurações executadas duas vezes cada (rodada 1 por script, rodada 2 pelo notebook 05):
+Nos validadores online, `USAR_CACHE_API` é desativado pelo código, e modo online não substitui HTTP por fixture silenciosamente. A aprovação do cadastro nesses roteiros evidencia o retorno da BrasilAPI nessa execução. A avaliação geral isolada pode usar cache quando habilitado. O trace de uma ferramenta, sozinho, não distingue uma requisição HTTP de uma leitura de cache.
 
-| experimento | agente | traj. | valor | juiz | tokens | custo US$ | latência média |
-|---|---|---|---|---|---|---|---|
-| apuracota-ec4abd9d | gpt-4o-mini | 1,00 | 1,00 | 1,0 | 31.653 | 0,0027 | 3,4 s |
-| apuracota-3ed9aadd | gpt-4o-mini | 1,00 | 1,00 | 1,0 | 31.688 | 0,0029 | 4,4 s |
-| apuracota-dummy-10b005df | dummy offline | 0,83 | 0,75 | — | 0 | 0 | 0,0 s |
-| apuracota-dummy-c29e1208 | dummy offline | 1,00 | 0,75 | — | 0 | 0 | 0,0 s |
-| apuracota-gpt4o-8864075c | gpt-4o | 0,83 | 0,50 | 1,0 | 29.630 | 0,0597 | 2,6 s |
-| apuracota-gpt4o-ff8ccc17 | gpt-4o | 0,83 | 1,00 | 1,0 | 29.632 | 0,0522 | 2,1 s |
+### Vídeo e fechamento da entrega
 
-A tabela é gerada por `comparar_experimentos()` (`src/evaluation.py`), que lê notas, tokens, custo e latência dos traces; os links de cada experimento estão na saída do notebook 05. Traces de uso (notebooks e Streamlit) ficam no projeto `apuracota` do LangSmith.
+**Vídeo de demonstração: PENDENTE — inserir o link real após gravar e publicar.** Não foi fornecido um endereço de vídeo. Publicar no Drive do aluno com acesso por link e testar em janela anônima. Mostrar decisão de ferramenta, chamada real à API com cache desativado, continuidade multi-turno, recuperação normativa e checagem. Tela e webcam seguem a orientação formal do enunciado, observadas as flexibilizações informadas pelo professor.
 
-**Onde o juiz discorda dos avaliadores determinísticos.** Nos dois experimentos com gpt-4o, o juiz deu 1,0 ao caso dos homônimos enquanto a trajetória deu 0: o modelo perguntou "qual Silva?" sem chamar `buscar_deputado`, apesar da regra explícita no prompt. O juiz avalia a resposta final (pedir esclarecimento é adequado); a trajetória cobra que a ambiguidade tenha sido verificada na fonte, que é o comportamento exigido de um agente de apuração. Na rodada 1 do gpt-4o, o juiz também deu 1,0 a respostas com "R$ 48,808.83" (formato en-US) que o avaliador de valor rejeitou; o avaliador foi corrigido para julgar o número e não o formato, e o formato passou a ser responsabilidade do juiz. O dummy erra o valor no caso de regra porque os embeddings fake não recuperam o trecho certo do Ato, limitação esperada do modo offline.
+Links das fontes: [CEAP — arquivos oficiais da Câmara](https://www.camara.leg.br/cota-parlamentar/); [BrasilAPI — documentação](https://brasilapi.com.br/docs); [CEIS — downloads oficiais](https://portaldatransparencia.gov.br/download-de-dados/ceis); [CNEP — downloads oficiais](https://portaldatransparencia.gov.br/download-de-dados/cnep). O texto normativo utilizado está em `data/normas/ato_mesa_43_2009.txt`.
 
-## 6. Análise comparativa
-
-Três configurações, mesmas seis perguntas, mesmos avaliadores (tabela na seção 5):
-
-- **Dummy offline** é o piso: sem nenhum LLM, as ferramentas determinísticas e as regras do mock acertam trajetória em 6/6 (rodada 2) e valor em 3/4, a custo zero e latência nula. Isso mostra que parte da qualidade do agente vem do desenho das ferramentas e dos guardrails, não do modelo. Falha onde depende de semântica (RAG com embeddings fake) e na primeira rodada expôs um bug real de dimensão do índice, corrigido.
-- **gpt-4o-mini** é a configuração de produção: 6/6 nos três avaliadores nas duas rodadas, US$ 0,003 por rodada de seis casos, 3 a 4 s por caso. É o único que cumpriu a regra de verificar homônimos na fonte.
-- **gpt-4o** custa cerca de 20 vezes mais por caso (US$ 0,05 a 0,06 por rodada) e é um pouco mais rápido, mas não foi melhor: repetiu nas duas rodadas o atalho de responder sem chamar `buscar_deputado` e, na primeira, escreveu valores em formato en-US. Modelo mais capaz não significa mais obediente ao prompt; para este agente, a aderência à trajetória vale mais que fluência.
-
-Conclusão: manter gpt-4o-mini no agente e gpt-4o só como juiz, onde a capacidade extra é usada para julgar e não para decidir.
-
-## 7. Limitações e melhorias
-
-- Memória episódica em RAM; persistir em FAISS/SQLite.
-- Índice só com o Ato da Mesa; incluir FAQ da cota e metadados por artigo.
-- Divergência API × CSV: criar ferramenta de reconciliação.
-- Rótulo da fonte: em uma execução online o agente atribuiu a média do partido (calculada no SQL) à "API da Câmara". O fact-check não pega erro de rótulo, só de valor; um verificador de fonte a partir da trajetória resolveria.
-- Ambiguidade de "limite": perguntado sobre o limite em SP após falar de combustível, o agente respondeu o sublimite de combustíveis (R$ 9.392,00, art. 3º, IX, redação do Ato 270/2023) em vez do teto mensal da UF (R$ 42.837,33). A resposta é correta pelo texto, mas não era a esperada; o prompt pode pedir que o agente apresente os dois quando houver sublimite.
-- Próxima disciplina (LangGraph): planejador, executor e verificador como nós, human-in-the-loop para homônimos.
-
-## 8. Evidências de execução
-
-Notebooks executados em `notebooks/` (saídas gravadas), testes (`devbox run test`, 37 passando), logs de callback (notebook 02), conversa multi-turno (notebook 03). Experimentos e traces no LangSmith (dataset: https://smith.langchain.com/o/d018734c-9bf1-40b6-b0d7-2c3d5d46f8fe/datasets/6501d508-7202-4e3e-b210-a61d17218b18). `[PENDENTE: prints do Streamlit e do LangSmith; link do vídeo]`
-
-## 9. Uso de IA generativa
-
-Planejamento, escrita de código, testes e revisão de texto com Claude (Anthropic) via Claude Code, a partir dos resumos das aulas e do enunciado. Todo o código foi executado e revisado pelo autor; as decisões de domínio (fontes, casos de teste, interpretação das regras da cota) são do autor.
-
-## Roteiro do vídeo (5 a 8 min)
-
-1. Abrir o Streamlit, mostrar o aviso de modo (online) e a thread nova.
-2. "Quanto a deputada Tabata Amaral gastou com combustível em 2025?" → mostrar na barra lateral a decisão `buscar_deputado` → `listar_despesas` (API real) e o painel de verificação com `CONFIRMADO`.
-3. "Compare com a média do partido dela." → memória entre turnos (deputado e categoria herdados) e `consultar_ceap` com a SQL auditada.
-4. "A cota pode pagar hospedagem em Brasília?" → RAG com citação do Ato da Mesa.
-5. "Gastos do Silva em 2025" → homônimos: o agente pergunta em vez de chutar.
-6. Encerrar mostrando o experimento no LangSmith com as métricas de trajetória.
+O pacote inclui código, seis notebooks com saídas registradas, lockfile, instruções, amostras/fixtures, normas, índice existente, avaliações e este PDF. Não inclui `.env`, chaves, ambiente virtual, histórico de conversas nem bancos de produção volumosos. O modo offline permite avaliação sem credenciais. Os roteiros e HTML auxiliares de apresentação ficam fora do repositório. O pacote está preparado para envio; a submissão no Moodle e o preenchimento do link do vídeo não são presumidos.

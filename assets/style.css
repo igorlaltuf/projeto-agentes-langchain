@@ -1,0 +1,73 @@
+:root {color-scheme:light;}
+.stApp {background:#f6f5ef;color:#182c27;}
+[data-testid="stHeader"] {background:transparent;pointer-events:none;}
+[data-testid="stHeader"] button,
+[data-testid="stHeader"] a {pointer-events:auto;}
+[data-testid="stMainBlockContainer"] {max-width:1180px;padding-top:5rem;padding-bottom:4rem;}
+h1,h2,h3 {color:#182c27;}
+h1,h2,h3 {letter-spacing:-.045em;}
+[data-testid="stSidebar"] {background:#eaece3;}
+.brand {display:flex;align-items:center;gap:12px;font-size:23px;font-weight:800;letter-spacing:-1px;}
+.brand-mark {background:#184c3b;color:#dcf58c;width:39px;height:39px;display:grid;place-items:center;border-radius:11px;font-family:monospace;letter-spacing:-4px;padding-right:4px;}
+.nav-note {text-align:right;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#54675c;padding:15px 0;}
+.eyebrow {font-family:monospace;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#486c48;margin:48px 0 20px;}
+.hero h1 {font-size:clamp(42px,5.6vw,72px);line-height:1.02;max-width:750px;margin:0 0 24px;font-weight:750;}
+.hero h1 em {font-style:normal;color:#537944;}
+.hero p {font-size:18px;line-height:1.65;max-width:550px;color:#59645b;margin-bottom:25px;}
+.micro {font-size:12px;color:#677264;margin-top:10px;}
+/* Keep the painted button inside the native widget's measured bounds.
+   Only the native button receives pointer events; labels cannot mask its hit area. */
+.stButton {max-width:100%;}
+.stButton > button {box-sizing:border-box;width:100%;max-width:100%;min-height:48px;cursor:pointer;position:relative;touch-action:manipulation;}
+.stButton > button * {pointer-events:none;}
+.stButton > button:disabled {cursor:not-allowed;}
+.stButton > button[kind="primary"] {background:#194b39;color:#fff;border:1px solid #194b39;border-radius:8px;min-height:48px;font-weight:650;}
+.stButton > button[kind="primary"]:hover {background:#2d6346;color:white;border-color:#2d6346;}
+/* Streamlit renders button labels inside a Markdown paragraph. Match that label
+   explicitly so theme/Markdown rules cannot turn it dark on a dark button. */
+.stButton > button[kind="primary"] [data-testid="stMarkdownContainer"],
+.stButton > button[kind="primary"] p,
+.stButton > button[kind="primary"] span {color:#fff !important;}
+.stButton > button[kind="primary"]:active {background:#123b2c;border-color:#123b2c;color:#fff;}
+.stButton > button:focus-visible {outline:3px solid #54763d;outline-offset:4px;box-shadow:0 0 0 2px #f6f5ef;}
+.stButton > button:disabled {opacity:1;background:#e3e7dc;border-color:#b6c1ae;color:#596652;}
+.stButton > button:disabled p,
+.stButton > button:disabled span {color:#596652 !important;}
+.stButton > button[kind="secondary"] {background:#fffef8;border:1px solid #94a489;border-radius:8px;color:#244b38;min-height:44px;}
+.stButton > button[kind="secondary"] p,
+.stButton > button[kind="secondary"] span {color:inherit;}
+.stButton > button[kind="secondary"]:hover {background:#e5eddc;border-color:#486c48;color:#183e2c;}
+.stButton > button[kind="secondary"]:active {background:#d5e2c9;color:#183e2c;}
+[data-testid="stChatInput"] textarea {color:#182c27;background:#fffef8;}
+[data-testid="stChatInput"] textarea::placeholder {color:#5b6955;opacity:1;}
+[data-testid="stCaptionContainer"] {color:#586650;}
+[data-testid="stExpander"] summary {color:#244b38;}
+.stApp a {color:#285b3e;text-decoration:underline;text-underline-offset:3px;}
+.stApp a:focus-visible {outline:2px solid #54763d;outline-offset:3px;}
+.preview {margin-top:48px;background:#143f32;border-radius:18px;padding:27px;color:#f7f7ef;box-shadow:0 24px 50px #254d3214;transform:rotate(1deg);}
+.preview-top {font:11px monospace;letter-spacing:1px;color:#c8dfa8;border-bottom:1px solid #ffffff25;padding-bottom:17px;display:flex;justify-content:space-between;}
+.preview-question {font-size:20px;font-weight:550;line-height:1.4;color:#fff;margin:25px 0;}
+.source-chip {display:inline-block;background:#ffffff15;color:#ddedcc;padding:7px 10px;font-size:11px;border-radius:5px;margin:0 4px 8px 0;}
+.preview-answer {background:#f3f3e7;border-radius:10px;padding:22px;margin-top:12px;}
+.preview-answer p {font-size:14px;line-height:1.65;margin:0;color:#254c3a;}
+.preview-label {font:10px monospace;color:#647a5b;letter-spacing:1px;margin-bottom:10px;}
+.trust-strip {border-top:1px solid #d7ddce;border-bottom:1px solid #d7ddce;padding:21px 0;margin:55px 0 34px;font-size:12px;color:#597050;letter-spacing:.4px;}
+.section-kicker {font:11px monospace;letter-spacing:2px;color:#5e754f;margin:15px 0;}
+.section-title {font-size:32px;letter-spacing:-1.2px;line-height:1.15;margin-bottom:25px;}
+.feature {border-top:2px solid #cbd5be;padding:20px 10px 10px 0;min-height:190px;}
+.feature span {font:12px monospace;color:#6a805b;}
+.feature h3 {font-size:21px;margin:14px 0 10px;}
+.feature p {font-size:14px;line-height:1.7;color:#606c5e;max-width:300px;}
+.footer {border-top:1px solid #d7ddce;margin-top:38px;padding-top:20px;color:#6e7868;font-size:12px;line-height:1.8;}
+.chat-heading {font-size:38px;font-weight:750;letter-spacing:-1.7px;line-height:1.15;margin-top:22px;}
+.chat-subtitle {font-size:15px;color:#61705d;margin:12px 0 24px;}
+[data-testid="stChatMessage"] {background:#fffef8;border:1px solid #e3e6d9;border-radius:12px;}
+[data-testid="stChatInput"] {border-color:#c7d1bd;}
+@media(max-width:640px){.nav-note{text-align:left;padding:5px 0;}.preview{margin-top:20px;transform:none;}.eyebrow{margin-top:24px;}.trust-strip{margin-top:32px;}.feature{min-height:0;padding-bottom:22px;}}
+
+.architecture-flow {display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:24px;background:#eaece3;border:1px solid #cbd5be;border-radius:12px;margin:24px 0 38px;}
+.architecture-flow span {background:#fffef8;border:1px solid #b6c1ae;border-radius:8px;padding:12px 16px;font-size:14px;color:#244b38;font-weight:600;}
+.architecture-flow b {color:#486c48;}
+
+.pipeline-chart {overflow-x:auto;margin:20px 0 12px;}
+.pipeline-chart svg {display:block;width:100%;min-width:760px;height:auto;}

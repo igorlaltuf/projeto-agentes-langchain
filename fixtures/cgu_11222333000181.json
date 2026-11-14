@@ -1,0 +1,14 @@
+{
+  "status": "DEMONSTRACAO",
+  "fonte": "Fixture sintética, não consulta real CGU",
+  "cnpj": "11222333000181",
+  "dados": {
+    "ceis": [
+      {
+        "descricao": "SANÇÃO FICTÍCIA para testar o fluxo; sem validade factual",
+        "orgao": "Órgão de demonstração"
+      }
+    ],
+    "cnep": []
+  }
+}

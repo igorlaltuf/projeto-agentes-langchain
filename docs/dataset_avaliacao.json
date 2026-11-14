@@ -1,23 +1,23 @@
 [
  {
-  "nome": "gasto_categoria_api",
+  "nome": "gasto_categoria_local",
   "pergunta": "Quanto a deputada Tabata Amaral gastou com combustível em 2025?",
   "ferramentas_esperadas": [
    "buscar_deputado",
    "listar_despesas"
   ],
   "valor_esperado": 48808.83,
-  "resposta_referencia": "Tabata Amaral gastou R$ 48.808,83 com combustíveis em 2025 (API da Câmara)."
+  "resposta_referencia": "Tabata Amaral gastou R$ 48.808,83 com combustíveis em 2025 (CSV CEAP)."
  },
  {
-  "nome": "gasto_total_api",
+  "nome": "gasto_total_local",
   "pergunta": "Qual foi o gasto total do deputado Nikolas Ferreira em 2025?",
   "ferramentas_esperadas": [
    "buscar_deputado",
    "listar_despesas"
   ],
-  "valor_esperado": 463433.18,
-  "resposta_referencia": "Nikolas Ferreira gastou R$ 463.433,18 em 2025 (API da Câmara)."
+  "valor_esperado": 389263.25,
+  "resposta_referencia": "Nikolas Ferreira gastou R$ 389.263,25 em 2025 (CSV CEAP)."
  },
  {
   "nome": "media_partido_sql",
@@ -37,7 +37,7 @@
   "ferramentas_proibidas": [
    "listar_despesas"
   ],
-  "resposta_referencia": "Ha varios deputados com o nome Silva; o agente deve pedir qual deles."
+  "resposta_referencia": "Consultar a busca local antes de esclarecer ambiguidade; se houver vários deputados, pedir qual. Se não houver correspondência, informar ausência na base."
  },
  {
   "nome": "regra_rag",
@@ -55,5 +55,22 @@
    "dados_fornecedor"
   ],
   "resposta_referencia": "SJR IMOVEIS LTDA, corretagem de imoveis, Sao Paulo-SP (Brasil API)."
+ },
+ {
+  "nome": "sancoes_locais",
+  "pergunta": "Há sanções para o CNPJ 33.927.528/0001-60?",
+  "ferramentas_esperadas": [
+   "consultar_sancoes"
+  ],
+  "resposta_referencia": "Consultar CEIS/CNEP locais, informar datas ou indisponibilidade, sem certificar regularidade."
+ },
+ {
+  "nome": "escopo_eleitoral",
+  "pergunta": "Quais bens declarados em 2022?",
+  "ferramentas_esperadas": [],
+  "ferramentas_proibidas": [
+   "consultar_dados"
+  ],
+  "resposta_referencia": "Explicar que dados eleitorais estão fora do escopo principal e oferecer consulta CEAP."
  }
 ]

@@ -10,3 +10,17 @@ def test_memoria_episodica_filtra_por_reporter():
         lembrar_apuracao.invoke({"consulta": "x", "reporter_id": "ninguem"})
         == "Nenhuma apuracao anterior encontrada."
     )
+
+
+def test_memoria_persistida_pode_ser_reaberta():
+    from src.memory import _banco_memorias
+
+    gravar_apuracao.invoke({"resumo": "Achado persistente", "reporter_id": "persistencia"})
+    with _banco_memorias() as conn:
+        assert (
+            conn.execute("SELECT resumo FROM apuracoes WHERE reporter=?", ("persistencia",)).fetchone()[0]
+            == "Achado persistente"
+        )
+    assert "Achado persistente" in lembrar_apuracao.invoke(
+        {"consulta": "Achado", "reporter_id": "persistencia"}
+    )

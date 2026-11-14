@@ -114,7 +114,7 @@ wheels = [
 ]
 
 [[package]]
-name = "apuracota"
+name = "apuramandato"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

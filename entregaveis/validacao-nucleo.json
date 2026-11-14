@@ -1,0 +1,477 @@
+{
+  "modo": "roteirizado offline",
+  "limite": "Offline valida ferramentas e fluxo; não mede qualidade do LLM ou HTTP real.",
+  "casos": [
+    {
+      "caso": "individual",
+      "pergunta": "Quanto a deputada Tabata Amaral gastou com combustível em 2025?",
+      "status": "PASSOU",
+      "resposta": "Tabata Amaral gastou R$ 48.808,83 com combust em 2025 (201 lancamentos). Maiores categorias: Combustíveis E Lubrificantes.: R$ 48.808,83. Fonte: Cota para o Exercício da Atividade Parlamentar (CEAP), 2025.",
+      "ferramentas": [
+        "buscar_deputado",
+        "listar_despesas"
+      ],
+      "valor_referencia": 48808.83,
+      "verificacao": {
+        "fact_check": [
+          {
+            "claim": "R$ 48.808,83",
+            "chave": "gasto_categoria",
+            "alegado": 48808.83,
+            "oficial": 48808.83,
+            "status": "CONFIRMADO"
+          },
+          {
+            "claim": "R$ 48.808,83",
+            "chave": "gasto_categoria",
+            "alegado": 48808.83,
+            "oficial": 48808.83,
+            "status": "CONFIRMADO"
+          }
+        ],
+        "nli": {
+          "nli_verdict": "NEUTRA",
+          "is_logically_coherent": true,
+          "detected_fallacies": [
+            "Nenhuma"
+          ],
+          "technical_justification": "Modo offline: NLI nao executado; considere apenas o fact-checking deterministico."
+        },
+        "truth": {
+          "gasto_categoria": {
+            "value": 48808.83,
+            "tolerance": 0.01,
+            "metric": "gasto_categoria",
+            "records": [
+              {
+                "value": 48808.83,
+                "context": {},
+                "tolerance": 0.01
+              }
+            ]
+          }
+        }
+      },
+      "segundos": 7.066
+    },
+    {
+      "caso": "outro_ano",
+      "pergunta": "E em 2024?",
+      "status": "PASSOU",
+      "resposta": "Tabata Amaral gastou R$ 15.642,05 com combust em 2024 (71 lancamentos). Maiores categorias: Combustíveis E Lubrificantes.: R$ 15.642,05. Fonte: Cota para o Exercício da Atividade Parlamentar (CEAP), 2024.",
+      "ferramentas": [
+        "listar_despesas"
+      ],
+      "valor_referencia": 15642.05,
+      "verificacao": {
+        "fact_check": [
+          {
+            "claim": "R$ 15.642,05",
+            "chave": "gasto_categoria",
+            "alegado": 15642.05,
+            "oficial": 15642.05,
+            "status": "CONFIRMADO"
+          },
+          {
+            "claim": "R$ 15.642,05",
+            "chave": "gasto_categoria",
+            "alegado": 15642.05,
+            "oficial": 15642.05,
+            "status": "CONFIRMADO"
+          }
+        ],
+        "nli": {
+          "nli_verdict": "NEUTRA",
+          "is_logically_coherent": true,
+          "detected_fallacies": [
+            "Nenhuma"
+          ],
+          "technical_justification": "Modo offline: NLI nao executado; considere apenas o fact-checking deterministico."
+        },
+        "truth": {
+          "gasto_categoria": {
+            "value": 15642.05,
+            "tolerance": 0.01,
+            "metric": "gasto_categoria",
+            "records": [
+              {
+                "value": 15642.05,
+                "context": {},
+                "tolerance": 0.01
+              }
+            ]
+          }
+        }
+      },
+      "segundos": 0.995
+    },
+    {
+      "caso": "ranking",
+      "pergunta": "Qual deputado mais gastou com combustível nos últimos 5 anos?",
+      "status": "PASSOU",
+      "resposta": "Resultado do banco local da CEAP — categoria COMBUST:\n- Adriano do Baldy: R$ 454.209,18\nFonte: Cota para o Exercício da Atividade Parlamentar (CEAP), 2022 a 2026 (ano corrente parcial).",
+      "ferramentas": [
+        "consultar_ceap"
+      ],
+      "valor_referencia": 454209.18,
+      "verificacao": {
+        "fact_check": [
+          {
+            "claim": "R$ 454.209,18",
+            "chave": "gasto_categoria",
+            "alegado": 454209.18,
+            "oficial": 454209.18,
+            "status": "CONFIRMADO"
+          }
+        ],
+        "nli": {
+          "nli_verdict": "NEUTRA",
+          "is_logically_coherent": true,
+          "detected_fallacies": [
+            "Nenhuma"
+          ],
+          "technical_justification": "Modo offline: NLI nao executado; considere apenas o fact-checking deterministico."
+        },
+        "truth": {
+          "gasto_categoria": {
+            "value": 454209.18,
+            "tolerance": 0.01,
+            "metric": "gasto_categoria",
+            "records": [
+              {
+                "value": 454209.18,
+                "context": {
+                  "nome_parlamentar": "Adriano do Baldy"
+                },
+                "tolerance": 0.01
+              }
+            ]
+          }
+        }
+      },
+      "segundos": 2.843
+    },
+    {
+      "caso": "anual",
+      "pergunta": "Quanto ele gastou por ano?",
+      "status": "PASSOU",
+      "resposta": "**Adriano do Baldy — combustível, de 2022 a 2026:**\n\n- 2022: R$ 63.645,26\n- 2023: R$ 101.923,71\n- 2024: R$ 101.076,57\n- 2025: R$ 105.304,96\n- 2026: R$ 82.258,68\n\n**Soma dos valores anuais: R$ 454.209,18.**\nA soma confere com o total do ranking anterior.\nFonte: Cota para o Exercício da Atividade Parlamentar (CEAP), 2022 até 2026.\nO ano de 2026 é parcial, conforme os dados disponíveis.",
+      "ferramentas": [
+        "consultar_ceap"
+      ],
+      "valor_referencia": 454209.18,
+      "verificacao": {
+        "fact_check": [
+          {
+            "claim": "R$ 63.645,26",
+            "chave": "gasto_categoria",
+            "alegado": 63645.26,
+            "oficial": 63645.26,
+            "status": "CONFIRMADO"
+          },
+          {
+            "claim": "R$ 101.923,71",
+            "chave": "gasto_categoria",
+            "alegado": 101923.71,
+            "oficial": 101923.71,
+            "status": "CONFIRMADO"
+          },
+          {
+            "claim": "R$ 101.076,57",
+            "chave": "gasto_categoria",
+            "alegado": 101076.57,
+            "oficial": 101076.57,
+            "status": "CONFIRMADO"
+          },
+          {
+            "claim": "R$ 105.304,96",
+            "chave": "gasto_categoria",
+            "alegado": 105304.96,
+            "oficial": 105304.96,
+            "status": "CONFIRMADO"
+          },
+          {
+            "claim": "R$ 82.258,68",
+            "chave": "gasto_categoria",
+            "alegado": 82258.68,
+            "oficial": 82258.68,
+            "status": "CONFIRMADO"
+          },
+          {
+            "claim": "R$ 454.209,18",
+            "chave": "gasto_categoria",
+            "alegado": 454209.18,
+            "oficial": 454209.18,
+            "status": "CONFIRMADO"
+          }
+        ],
+        "nli": {
+          "nli_verdict": "NEUTRA",
+          "is_logically_coherent": true,
+          "detected_fallacies": [
+            "Nenhuma"
+          ],
+          "technical_justification": "Modo offline: NLI nao executado; considere apenas o fact-checking deterministico."
+        },
+        "truth": {
+          "gasto_categoria": {
+            "value": null,
+            "tolerance": 0.01,
+            "metric": "gasto_categoria",
+            "records": [
+              {
+                "value": 63645.26,
+                "context": {
+                  "ano": 2022
+                },
+                "tolerance": 0.01
+              },
+              {
+                "value": 101923.71,
+                "context": {
+                  "ano": 2023
+                },
+                "tolerance": 0.01
+              },
+              {
+                "value": 101076.57,
+                "context": {
+                  "ano": 2024
+                },
+                "tolerance": 0.01
+              },
+              {
+                "value": 105304.96,
+                "context": {
+                  "ano": 2025
+                },
+                "tolerance": 0.01
+              },
+              {
+                "value": 82258.68,
+                "context": {
+                  "ano": 2026
+                },
+                "tolerance": 0.01
+              },
+              {
+                "value": 454209.18,
+                "context": {
+                  "escopo": "soma dos valores anuais"
+                },
+                "tolerance": 0.01
+              }
+            ]
+          }
+        }
+      },
+      "segundos": 0.986
+    },
+    {
+      "caso": "fornecedores",
+      "pergunta": "Quais os maiores fornecedores dele?",
+      "status": "PASSOU",
+      "resposta": "**Adriano do Baldy — 2022 até 2026**\n\n- AUTO POSTO ASTRO DA MUTIRAO LTDA — CNPJ 04081151000172: R$ 324.446,48\n\n- AUTO POSTO GOLDEN GAS 202 LTDA — CNPJ 30880112000145: R$ 11.684,37\n\n- VALPOSTO COMBUSTIVEIS LTDA — CNPJ 25124074000160: R$ 7.905,92\n\n- 063 - 311 SUL - CASCOL COMBUSTIVEIS PARA VEICULOS LTDA — CNPJ 00306597006308: R$ 4.849,82\n\n- Auto Posto Derivados de Petroleo California Ltda — CNPJ 05344951000100: R$ 4.077,22\n\n- REDE DE POSTOS MARAJO GRANDE GOIANIA LTDA — CNPJ 20940512000145: R$ 1.976,58\n\n- BURITI COM.DE DERIVADOS DE PET LTDA — CNPJ 10827927000153: R$ 1.936,70\n\n- CRUZ E CRUZ COMERCIO DE COMBUSTIVEIS LTDA — CNPJ 04006471000168: R$ 1.735,11\n\n- PETROCOM COMERCIO LTDA. — CNPJ 14728378000382: R$ 1.684,46\n\n- Cupertino Combustiveis Ltda — CNPJ 50779798000190: R$ 1.556,97\n\nCategoria preservada: COMBUST.\n\nRecorte de empresas com CNPJ completo válido; valores líquidos incluem estornos.\n\nFonte: Cota para o Exercício da Atividade Parlamentar (CEAP), 2022 até 2026.\n\nO ano de 2026 é parcial.",
+      "ferramentas": [
+        "investigar_fornecedores"
+      ],
+      "valor_referencia": null,
+      "verificacao": {
+        "metodo": "reexecucao_estruturada",
+        "fact_check": [
+          {
+            "claim": "Identidade, período, documentos e valores da resposta estruturada",
+            "chave": "investigacao_fornecedores",
+            "alegado": "Resposta apresentada",
+            "oficial": "Consulta CEAP reexecutada e apresentação de referência",
+            "status": "CONFIRMADO"
+          }
+        ],
+        "nli": {
+          "nli_verdict": "NEUTRA",
+          "is_logically_coherent": true,
+          "detected_fallacies": [
+            "Nenhuma"
+          ],
+          "technical_justification": "Checagem determinística: consulta reexecutada e resposta comparada com a apresentação dos dados. Não é auditoria independente nem julgamento NLI por modelo."
+        },
+        "truth": {
+          "fonte": "Cota para o Exercício da Atividade Parlamentar (CEAP)",
+          "anos": [
+            2022,
+            2023,
+            2024,
+            2025,
+            2026
+          ],
+          "id_deputado": 121948,
+          "dados": [
+            {
+              "cnpj": "04081151000172",
+              "fornecedor": "AUTO POSTO ASTRO DA MUTIRAO LTDA",
+              "valor": 324446.48,
+              "valor_centavos": 32444648,
+              "registros": 69
+            },
+            {
+              "cnpj": "30880112000145",
+              "fornecedor": "AUTO POSTO GOLDEN GAS 202 LTDA",
+              "valor": 11684.37,
+              "valor_centavos": 1168437,
+              "registros": 14
+            },
+            {
+              "cnpj": "25124074000160",
+              "fornecedor": "VALPOSTO COMBUSTIVEIS LTDA",
+              "valor": 7905.92,
+              "valor_centavos": 790592,
+              "registros": 20
+            },
+            {
+              "cnpj": "00306597006308",
+              "fornecedor": "063 - 311 SUL - CASCOL COMBUSTIVEIS PARA VEICULOS LTDA",
+              "valor": 4849.82,
+              "valor_centavos": 484982,
+              "registros": 24
+            },
+            {
+              "cnpj": "05344951000100",
+              "fornecedor": "Auto Posto Derivados de Petroleo California Ltda",
+              "valor": 4077.22,
+              "valor_centavos": 407722,
+              "registros": 6
+            },
+            {
+              "cnpj": "20940512000145",
+              "fornecedor": "REDE DE POSTOS MARAJO GRANDE GOIANIA LTDA",
+              "valor": 1976.58,
+              "valor_centavos": 197658,
+              "registros": 8
+            },
+            {
+              "cnpj": "10827927000153",
+              "fornecedor": "BURITI COM.DE DERIVADOS DE PET LTDA",
+              "valor": 1936.7,
+              "valor_centavos": 193670,
+              "registros": 13
+            },
+            {
+              "cnpj": "04006471000168",
+              "fornecedor": "CRUZ E CRUZ COMERCIO DE COMBUSTIVEIS LTDA",
+              "valor": 1735.11,
+              "valor_centavos": 173511,
+              "registros": 6
+            },
+            {
+              "cnpj": "14728378000382",
+              "fornecedor": "PETROCOM COMERCIO LTDA.",
+              "valor": 1684.46,
+              "valor_centavos": 168446,
+              "registros": 10
+            },
+            {
+              "cnpj": "50779798000190",
+              "fornecedor": "Cupertino Combustiveis Ltda",
+              "valor": 1556.97,
+              "valor_centavos": 155697,
+              "registros": 8
+            }
+          ],
+          "referencias": {}
+        }
+      },
+      "segundos": 1.979
+    },
+    {
+      "caso": "cadastro",
+      "pergunta": "Consulte o cadastro do CNPJ 33.927.528/0001-60.",
+      "status": "PASSOU",
+      "resposta": "Dados do fornecedor (Brasil API): {\"status\": \"CONSULTADO\", \"cnpj\": \"33927528000160\", \"razao_social\": \"SJR IMOVEIS LTDA\", \"situacao\": \"ATIVA\", \"cnae_principal\": \"Corretagem na compra e venda e avaliação de imóveis\", \"municipio\": \"SAO PAULO-SP\", \"abertura\": \"2019-06-14\", \"qsa_disponivel\": true, \"socios\": [{\"nome\": \"MONICA ROSANE FERNANDES PINHEIRO DE LIMA\", \"qualificacao\": \"Sócio-Administrador\", \"entrada\": \"2021-09-24\", \"documento\": \"***922078**\"}, {\"nome\": \"ROGER HILAOKI MACEDO NAGATANI\", \"qualificacao\": \"Sócio-Administrador\", \"entrada\": \"2025-03-18\", \"documento\": \"***017168**\"}], \"fonte\": \"BrasilAPI / Minha Receita\", \"consultado_em\": \"fixture gravada\"}",
+      "ferramentas": [
+        "dados_fornecedor"
+      ],
+      "valor_referencia": null,
+      "verificacao": {
+        "fact_check": [],
+        "nli": {
+          "nli_verdict": "NEUTRA",
+          "is_logically_coherent": true,
+          "detected_fallacies": [
+            "Nenhuma"
+          ],
+          "technical_justification": "Não foi possível verificar os valores com as referências disponíveis. Isso não comprova erro de cálculo nem confirma a coerência da resposta."
+        },
+        "truth": {}
+      },
+      "segundos": 0.014
+    },
+    {
+      "caso": "sancoes",
+      "pergunta": "Essa empresa aparece no CEIS ou CNEP?",
+      "status": "PASSOU",
+      "resposta": "Consulta de sanções: {\"status\": \"CONSULTADO\", \"fonte\": \"CEIS e CNEP — Portal da Transparência (CGU)\", \"cnpj\": \"33927528000160\", \"dados\": {\"ceis\": [], \"cnep\": []}, \"cargas\": {\"ceis\": {\"cadastro\": \"ceis\", \"lote_id\": 51, \"data_referencia\": \"2026-11-13\", \"registros\": 23667, \"status\": \"PUBLICADO\", \"criado_em\": \"2026-11-13 22:20:36\", \"sha256\": \"e99e739dd5144ae2b7b47d8b14e2ea2772f728bfadf2a980ab5a0b6b5c170e7d\", \"url\": \"https://portaldatransparencia.gov.br/download-de-dados/ceis/20261113\", \"nome_base\": \"Cadastro Nacional de Empresas Inidôneas e Suspensas (CEIS)\", \"dias_desde_referencia\": 0}, \"cnep\": {\"cadastro\": \"cnep\", \"lote_id\": 52, \"data_referencia\": \"2026-11-13\", \"registros\": 1845, \"status\": \"PUBLICADO\", \"criado_em\": \"2026-11-13 22:20:42\", \"sha256\": \"0fe53009df6e2725a64ef1ca6977ce4da9117a8e0607f1adc5f219bd6fa2077b\", \"url\": \"https://portaldatransparencia.gov.br/download-de-dados/cnep/20261113\", \"nome_base\": \"Cadastro Nacional de Empresas Punidas (CNEP)\", \"dias_desde_referencia\": 0}}, \"aviso\": \"Resultado limitado às versões carregadas. Ausência de registro não certifica regularidade. Não infira vigência apenas pela data final; considere categoria, órgão, abrangência e observações originais. A carga não é histórico completo de sanções.\", \"consulta_completa\": true, \"demonstracao\": false}",
+      "ferramentas": [
+        "consultar_sancoes"
+      ],
+      "valor_referencia": null,
+      "verificacao": {
+        "fact_check": [],
+        "nli": {
+          "nli_verdict": "NEUTRA",
+          "is_logically_coherent": true,
+          "detected_fallacies": [
+            "Nenhuma"
+          ],
+          "technical_justification": "Não foi possível verificar os valores com as referências disponíveis. Isso não comprova erro de cálculo nem confirma a coerência da resposta."
+        },
+        "truth": {}
+      },
+      "segundos": 0.339
+    },
+    {
+      "caso": "rag",
+      "pergunta": "A cota pode pagar hospedagem em Brasília?",
+      "status": "PASSOU",
+      "resposta": "Segundo o Ato da Mesa 43/2009 (trechos recuperados):\nFonte: Ato da Mesa 43/2009 (consolidado)\nk) serviços de limpeza e higienização prestado por empresa especializada, incluído o fornecimento dos insumos necessários à execução desses serviços. (Alínea acrescida pelo Ato da Mesa nº 196, de 27/5/2025)\n\nV - assinatura de publicações;\n\nVI - fornecimento de alimentação do parlamentar;\n\nVII - hospedagem, exceto do parlamentar no Distrito Federal;\n\nVIII - outras despesas com locomoção, contemplando:\n\na) locação ou fretamento de aeronaves;\n\nFonte: Ato da Mesa 43/2009 (consolidado)\n§ 3º Além da cota estabelecida no Anexo deste Ato, o Deputado fará jus ao reembolso de até quatro trechos de bilhetes aéreos, ida e volta, por mês, tendo como destino o Distrito Federal e como origem o respectivo estado de representação ou, desde que autorizado pela Tercei",
+      "ferramentas": [
+        "consultar_regras_cota"
+      ],
+      "valor_referencia": null,
+      "verificacao": {
+        "fact_check": [],
+        "nli": {
+          "nli_verdict": "NEUTRA",
+          "is_logically_coherent": true,
+          "detected_fallacies": [
+            "Nenhuma"
+          ],
+          "technical_justification": "Não foi possível verificar os valores com as referências disponíveis. Isso não comprova erro de cálculo nem confirma a coerência da resposta."
+        },
+        "truth": {}
+      },
+      "segundos": 0.079
+    },
+    {
+      "caso": "fora_escopo",
+      "pergunta": "Quais bens o deputado declarou ao TSE em 2022?",
+      "status": "PASSOU",
+      "resposta": "Este fluxo consulta gastos da CEAP, regras da cota, fornecedores e sanções. Dados eleitorais e emendas estão fora do escopo principal. Posso apurar despesas parlamentares por deputado e período.",
+      "ferramentas": [],
+      "valor_referencia": null,
+      "verificacao": {
+        "fact_check": [],
+        "nli": {
+          "nli_verdict": "NEUTRA",
+          "is_logically_coherent": true,
+          "detected_fallacies": [
+            "Nenhuma"
+          ],
+          "technical_justification": "Não foi possível verificar os valores com as referências disponíveis. Isso não comprova erro de cálculo nem confirma a coerência da resposta."
+        },
+        "truth": {}
+      },
+      "segundos": 0.006
+    }
+  ],
+  "status": "EXECUTADO"
+}

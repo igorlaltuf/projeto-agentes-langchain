@@ -1,7 +1,7 @@
 [project]
-name = "apuracota"
+name = "apuramandato"
 version = "0.1.0"
-description = "Agente de apuração de gastos parlamentares (CEAP) com LangChain"
+description = "Agente de apuração de mandatos, emendas e dados eleitorais com LangChain"
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
 authors = [{ name = "Igor Laltuf" }]
@@ -33,7 +33,7 @@ dev = [
 package = false
 
 [tool.ruff]
-extend-exclude = ["notebooks"]
+extend-exclude = ["notebooks", "entregaveis/historico"]
 line-length = 110
 target-version = "py312"
 

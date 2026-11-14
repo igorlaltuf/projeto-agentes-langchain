@@ -1,0 +1,64 @@
+{
+  "executado_em": "2026-11-13T22:06:52.032017+00:00",
+  "modo": "offline",
+  "banco": "/home/laltuf/Infnet/projeto-agentes-langchain/data/ceap.db",
+  "status": "EXECUTADO",
+  "resultados": [
+    {
+      "caso": "gasto_categoria_local",
+      "resposta": "Tabata Amaral gastou R$ 48.808,83 com combust em 2025 (201 lancamentos). Maiores categoria",
+      "trajetoria_correta": 1,
+      "valor_correto": 1,
+      "juiz_llm": null
+    },
+    {
+      "caso": "gasto_total_local",
+      "resposta": "Nikolas Ferreira gastou R$ 389.263,25 em 2025 (339 lancamentos). Maiores categorias: Locaç",
+      "trajetoria_correta": 1,
+      "valor_correto": 1,
+      "juiz_llm": null
+    },
+    {
+      "caso": "media_partido_sql",
+      "resposta": "Media por deputado: R$ 48.849,91 no período 2025. Fonte: Cota para o Exercício da Atividad",
+      "trajetoria_correta": 1,
+      "valor_correto": 1,
+      "juiz_llm": null
+    },
+    {
+      "caso": "homonimos",
+      "resposta": "Encontrei mais de um deputado com esse nome. Qual deles?\nid=73701 | Benedita da Silva | PT",
+      "trajetoria_correta": 1,
+      "valor_correto": null,
+      "juiz_llm": null
+    },
+    {
+      "caso": "regra_rag",
+      "resposta": "Segundo o Ato da Mesa 43/2009 (trechos recuperados):\nFonte: Ato da Mesa 43/2009 (consolida",
+      "trajetoria_correta": 1,
+      "valor_correto": 1,
+      "juiz_llm": null
+    },
+    {
+      "caso": "fornecedor_api",
+      "resposta": "Dados do fornecedor (Brasil API): {\"status\": \"CONSULTADO\", \"cnpj\": \"33927528000160\", \"raza",
+      "trajetoria_correta": 1,
+      "valor_correto": null,
+      "juiz_llm": null
+    },
+    {
+      "caso": "sancoes_locais",
+      "resposta": "Consulta de sanções: {\"status\": \"INDISPONIVEL\", \"erro\": \"Bases de sanções indisponíveis; e",
+      "trajetoria_correta": 1,
+      "valor_correto": null,
+      "juiz_llm": null
+    },
+    {
+      "caso": "escopo_eleitoral",
+      "resposta": "Este fluxo consulta gastos da CEAP, regras da cota, fornecedores e sanções. Dados eleitora",
+      "trajetoria_correta": 1,
+      "valor_correto": null,
+      "juiz_llm": null
+    }
+  ]
+}

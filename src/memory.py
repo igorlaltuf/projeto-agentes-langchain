@@ -9,6 +9,8 @@
 
 from __future__ import annotations
 
+import sqlite3
+
 from langchain_core.documents import Document
 from langchain_core.messages import SystemMessage, trim_messages
 from langchain_core.tools import tool
@@ -42,15 +44,15 @@ def podar_historico(mensagens, llm, max_tokens: int = 3000):
 # ----------------------------------------------------------------------------- #
 # Longo prazo episódico: apurações anteriores
 # ----------------------------------------------------------------------------- #
-_ltm_episodica: InMemoryVectorStore | None = None
-
-
-def _store() -> InMemoryVectorStore:
-    """Cria o vector store episódico sob demanda (evita exigir a chave da OpenAI no import)."""
-    global _ltm_episodica
-    if _ltm_episodica is None:
-        _ltm_episodica = InMemoryVectorStore(embedding=llm.embeddings())
-    return _ltm_episodica
+def _banco_memorias():
+    caminho = config.SQLITE_CEAP.parent / "memorias.db"
+    caminho.parent.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(caminho)
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS apuracoes "
+        "(reporter TEXT NOT NULL, data TEXT NOT NULL, resumo TEXT NOT NULL)"
+    )
+    return conn
 
 
 class GravarApuracaoArgs(BaseModel):
@@ -64,9 +66,11 @@ class GravarApuracaoArgs(BaseModel):
 def gravar_apuracao(resumo: str, reporter_id: str) -> str:
     """Salva o resumo de uma apuracao na memoria de longo prazo do reporter, com a data.
     Use quando o usuario pedir para guardar, resumir ou fechar uma apuracao."""
-    _store().add_documents(
-        [Document(page_content=resumo, metadata={"reporter": reporter_id, "data": config.HOJE})]
-    )
+    with _banco_memorias() as conn:
+        conn.execute(
+            "INSERT INTO apuracoes(reporter, data, resumo) VALUES (?, ?, ?)",
+            (reporter_id, config.HOJE, resumo),
+        )
     return f"Apuracao salva para '{reporter_id}' em {config.HOJE}."
 
 
@@ -79,9 +83,16 @@ class LembrarApuracaoArgs(BaseModel):
 def lembrar_apuracao(consulta: str, reporter_id: str) -> str:
     """Recupera apuracoes anteriores do reporter por similaridade semantica.
     Use quando o usuario fizer referencia ao passado ('aquele fornecedor', 'semana passada')."""
-    docs = _store().similarity_search(
-        consulta, k=3, filter=lambda d: d.metadata.get("reporter") == reporter_id
-    )
+    with _banco_memorias() as conn:
+        linhas = conn.execute(
+            "SELECT resumo, data FROM apuracoes WHERE reporter=?", (reporter_id,)
+        ).fetchall()
+    if not linhas:
+        return "Nenhuma apuracao anterior encontrada."
+    # Reconstrói apenas os embeddings do repórter: registros sobrevivem ao reinício.
+    store = InMemoryVectorStore(embedding=llm.embeddings())
+    store.add_documents([Document(page_content=resumo, metadata={"data": data}) for resumo, data in linhas])
+    docs = store.similarity_search(consulta, k=3)
     if not docs:
         return "Nenhuma apuracao anterior encontrada."
     return "\n".join(f"* [{d.metadata['data']}] {d.page_content}" for d in docs)

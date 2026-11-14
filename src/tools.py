@@ -16,6 +16,7 @@ import json
 import re
 import statistics
 import unicodedata
+from datetime import UTC, datetime
 from typing import Literal
 
 import httpx
@@ -78,7 +79,10 @@ def _chave_fixture(url: str, params: dict | None) -> str:
 def _get_json(url: str, params: dict | None = None) -> dict:
     """GET com cache em fixtures. Em MODO_OFFLINE só lê o fixture."""
     caminho = config.FIXTURES_DIR / f"{_chave_fixture(url, params)}.json"
-    if config.MODO_OFFLINE or caminho.exists():
+    import time
+
+    fresco = caminho.exists() and time.time() - caminho.stat().st_mtime < 86400
+    if config.MODO_OFFLINE or (config.USAR_CACHE_API and fresco):
         if not caminho.exists():
             raise FileNotFoundError(
                 f"Modo offline sem fixture para {url} {params}. "
@@ -88,6 +92,7 @@ def _get_json(url: str, params: dict | None = None) -> dict:
     resp = httpx.get(url, params=params, timeout=30, headers={"Accept": "application/json"})
     resp.raise_for_status()
     dados = resp.json()
+    dados["_consultado_em"] = datetime.now(UTC).isoformat()
     config.FIXTURES_DIR.mkdir(exist_ok=True)
     caminho.write_text(
         json.dumps({"_url": url, "_params": params, **dados}, ensure_ascii=False, indent=1), encoding="utf-8"
@@ -101,25 +106,22 @@ def _get_json(url: str, params: dict | None = None) -> dict:
 class BuscarDeputadoArgs(BaseModel):
     nome: str = Field(..., description="Nome ou parte do nome do deputado.")
     uf: str | None = Field(default=None, description="Sigla da UF para desambiguar (ex: SP).")
+    ano: int | None = Field(
+        default=None, description="Ano da apuração, para resolver nomes e partidos históricos."
+    )
 
 
 @tool(args_schema=BuscarDeputadoArgs)
-def buscar_deputado(nome: str, uf: str | None = None) -> str:
-    """Busca deputados federais em exercicio pelo nome na API da Camara.
+def buscar_deputado(nome: str, uf: str | None = None, ano: int | None = None) -> str:
+    """Busca deputados pelo nome no banco histórico da CEAP, sem chamadas externas.
     Retorna id, nome, partido e UF. Se houver mais de um resultado, liste-os
     e peca ao usuario para escolher antes de consultar despesas."""
-    params = {"nome": nome, "ordem": "ASC", "ordenarPor": "nome"}
-    if uf:
-        params["siglaUf"] = uf.upper()
-    dados = _get_json(f"{config.API_CAMARA}/deputados", params)
-    itens = dados.get("dados", [])
-    if not itens:
-        return f"Nenhum deputado encontrado para '{nome}'."
-    linhas = [f"id={d['id']} | {d['nome']} | {d['siglaPartido']}-{d['siglaUf']}" for d in itens[:10]]
-    return "\n".join(linhas)
+    from src.data import buscar_deputado_local
 
-
-MAX_PAGINAS = 12  # 12 x 100 itens cobre um ano inteiro da maioria dos deputados
+    encontrados = buscar_deputado_local(nome, uf, ano)
+    if encontrados:
+        return encontrados
+    return f"Nenhum deputado encontrado para '{nome}' na CEAP carregada. Confira nome, UF e período."
 
 
 def legislatura_do_ano(ano: int) -> int:
@@ -140,9 +142,20 @@ class ListarDespesasArgs(BaseModel):
 
 @tool(args_schema=ListarDespesasArgs)
 def listar_despesas(id_deputado: int, ano: int, mes: int | None = None, categoria: str | None = None) -> str:
-    """Lista as despesas da cota parlamentar (CEAP) de um deputado na API da Camara,
-    por ano e opcionalmente por mes e categoria. Retorna JSON com data, tipo,
+    """Lista despesas de um deputado: todos os anos usam CSV/SQLite local.
+    Filtra por ano, mês e categoria. Retorna a fonte efetiva, data, tipo,
     fornecedor, CNPJ e valor liquido de cada despesa, mais o total."""
+    from src.data import despesas_individuais_locais
+
+    try:
+        return despesas_individuais_locais(id_deputado, ano, mes, categoria)
+    except (RuntimeError, ValueError) as exc:
+        return json.dumps({"status": "INDISPONIVEL", "ano": ano, "erro": str(exc)}, ensure_ascii=False)
+
+
+def _listar_despesas_api(
+    id_deputado: int, ano: int, mes: int | None = None, categoria: str | None = None
+) -> str:
     # A API so devolve despesas quando recebe tambem a legislatura (57 = 2023-2026).
     params = {
         "idLegislatura": legislatura_do_ano(ano),
@@ -153,15 +166,25 @@ def listar_despesas(id_deputado: int, ano: int, mes: int | None = None, categori
     }
     if mes:
         params["mes"] = mes
-    # A API pagina em 100 itens; percorre as paginas (limite de seguranca em MAX_PAGINAS).
+    # Percorre todas as páginas. Falhas interrompem a consulta sem publicar um total parcial.
     itens: list[dict] = []
-    for pagina in range(1, MAX_PAGINAS + 1):
+    pagina = 1
+    paginas_vistas = set()
+    while True:
         dados = _get_json(
             f"{config.API_CAMARA}/deputados/{id_deputado}/despesas", {**params, "pagina": pagina}
         )
-        itens += dados.get("dados", [])
+        lote = dados.get("dados", [])
+        assinatura = json.dumps(lote, sort_keys=True)
+        if lote and assinatura in paginas_vistas:
+            raise RuntimeError("A API repetiu uma página; consulta incompleta, total não calculado.")
+        paginas_vistas.add(assinatura)
+        itens += lote
         if not any(link.get("rel") == "next" for link in dados.get("links", [])):
             break
+        if not lote:
+            raise RuntimeError("A API retornou página vazia com continuação; consulta incompleta.")
+        pagina += 1
     if categoria:
         radical = normalizar_categoria(categoria)
         itens = [d for d in itens if radical in sem_acento(d.get("tipoDespesa", "")).upper()]
@@ -184,6 +207,9 @@ def listar_despesas(id_deputado: int, ano: int, mes: int | None = None, categori
             "id_deputado": id_deputado,
             "ano": ano,
             "mes": mes,
+            "fonte": "API da Camara",
+            "consulta_completa": True,
+            "paginas_consultadas": pagina,
             "total_registros": len(resumo),
             "total_valor": total,
             "total_por_tipo": dict(sorted(por_tipo.items(), key=lambda kv: -kv[1])),
@@ -203,17 +229,54 @@ class FornecedorArgs(BaseModel):
 @tool(args_schema=FornecedorArgs)
 def dados_fornecedor(cnpj: str) -> str:
     """Consulta a Brasil API e retorna razao social, situacao cadastral, CNAE
-    principal, municipio e data de abertura de um fornecedor pelo CNPJ."""
-    digitos = "".join(c for c in cnpj if c.isdigit())
-    if len(digitos) != 14:
+    principal, municipio, abertura e quadro de sócios e administradores pelo CNPJ."""
+    from src.identity import cnpj_valido, documento_posicional
+
+    digitos = documento_posicional(cnpj)
+    if not cnpj_valido(digitos):
         return f"CNPJ invalido: {cnpj}"
-    d = _get_json(f"{config.API_BRASIL}/cnpj/v1/{digitos}")
+    try:
+        d = _get_json(f"{config.API_BRASIL}/cnpj/v1/{digitos}")
+        if not isinstance(d, dict) or not d.get("razao_social"):
+            raise ValueError("Cadastro não identificado")
+        if d.get("cnpj") and documento_posicional(str(d["cnpj"])) != digitos:
+            raise ValueError("Documento retornado diverge do solicitado")
+    except (httpx.HTTPError, FileNotFoundError, ValueError):
+        return json.dumps(
+            {
+                "status": "INDISPONIVEL",
+                "cnpj": digitos,
+                "erro": "Cadastro empresarial indisponível. Não foi possível confirmar os dados da empresa.",
+            },
+            ensure_ascii=False,
+        )
     campos = {
+        "status": "CONSULTADO",
+        "cnpj": digitos,
         "razao_social": d.get("razao_social"),
         "situacao": d.get("descricao_situacao_cadastral"),
         "cnae_principal": d.get("cnae_fiscal_descricao"),
         "municipio": f"{d.get('municipio')}-{d.get('uf')}",
         "abertura": d.get("data_inicio_atividade"),
+        "qsa_disponivel": isinstance(d.get("qsa"), list),
+        "socios": [
+            {
+                "nome": s.get("nome_socio"),
+                "qualificacao": s.get("qualificacao_socio"),
+                "entrada": s.get("data_entrada_sociedade"),
+                "documento": s.get("cnpj_cpf_do_socio"),
+            }
+            for s in d.get("qsa", [])
+            if isinstance(s, dict)
+        ]
+        if isinstance(d.get("qsa"), list)
+        else [],
+        "fonte": "Fixture sintética de demonstração"
+        if d.get("_demonstracao")
+        else "BrasilAPI / Minha Receita",
+        "consultado_em": d.get(
+            "_consultado_em", "fixture gravada" if config.MODO_OFFLINE else datetime.now(UTC).isoformat()
+        ),
     }
     return json.dumps(campos, ensure_ascii=False)
 
@@ -261,3 +324,17 @@ def calcular_estatisticas(valores: list[float], operacao: str) -> str:
 def toolkit_basico() -> list:
     """Ferramentas da fase 2 (sem SQL e sem RAG)."""
     return [buscar_deputado, listar_despesas, dados_fornecedor, calcular_estatisticas]
+
+
+class SancoesArgs(BaseModel):
+    cnpj: str = Field(description="CNPJ do fornecedor, com ou sem pontuação")
+
+
+@tool(args_schema=SancoesArgs)
+def consultar_sancoes(cnpj: str) -> str:
+    """Consulta CEIS e CNEP carregados por CNPJ completo válido, sem rede ou chave CGU.
+    Retorna a data de cada base e os registros, sem certificar regularidade ou vigência.
+    """
+    from src.sanctions import consultar_sancoes_locais
+
+    return json.dumps(consultar_sancoes_locais(cnpj), ensure_ascii=False)

@@ -23,7 +23,7 @@ def test_agregacao_por_categoria():
     saida = consultar_ceap.invoke(
         {
             "query_sql": "SELECT ROUND(SUM(valor),2) AS total FROM despesas_ceap "
-            "WHERE id_deputado=204534 AND categoria LIKE '%COMBUST%'"
+            "WHERE id_deputado=204534 AND ano=2025 AND categoria LIKE '%COMBUST%'"
         }
     )
     assert "48808.83" in saida
@@ -48,3 +48,101 @@ def test_indice_carrega_e_retriever_responde():
     ferramenta = ferramenta_regras_cota(k=2)
     assert ferramenta.name == "consultar_regras_cota"
     assert ferramenta.invoke({"query": "prazo"})
+
+
+def test_importacao_multiano_preserva_e_nao_duplica(tmp_path):
+    import sqlite3
+    from pathlib import Path
+
+    import pandas as pd
+
+    from src.data import construir_sqlite
+
+    amostra = Path(__file__).parent / "dados/ceap_amostra.csv"
+    anterior = tmp_path / "2024.csv"
+    df = pd.read_csv(amostra, sep=";", dtype=str)
+    df["numAno"] = "2024"
+    df.to_csv(anterior, sep=";", index=False)
+    db = tmp_path / "ceap.db"
+    n = construir_sqlite(amostra, db)
+    assert construir_sqlite(anterior, db) == n
+    construir_sqlite(anterior, db)
+    with sqlite3.connect(db) as conn:
+        assert conn.execute(
+            "SELECT ano, COUNT(*) FROM despesas_ceap GROUP BY ano ORDER BY ano"
+        ).fetchall() == [(2024, n), (2025, n)]
+
+
+def test_sql_exige_carga_explicita_antes_de_agregar(monkeypatch, tmp_path):
+    from pathlib import Path
+
+    import pandas as pd
+
+    from src import config
+    from src.data import anos_disponiveis
+
+    monkeypatch.setattr(config, "DATA_DIR", tmp_path)
+    df = pd.read_csv(Path(__file__).parent / "dados/ceap_amostra.csv", sep=";", dtype=str)
+    df["numAno"] = "2024"
+    df.to_csv(tmp_path / "ceap_2024.csv", sep=";", index=False)
+    saida = consultar_ceap.invoke(
+        {"query_sql": "SELECT ROUND(SUM(valor),2) AS total FROM despesas_ceap WHERE ano=2024", "anos": [2024]}
+    )
+    assert "Dados indisponíveis" in saida
+    from src.data import construir_sqlite
+
+    construir_sqlite(tmp_path / "ceap_2024.csv")
+    assert anos_disponiveis() == [2024, 2025]
+
+
+def test_ano_ausente_offline_nao_vira_zero():
+    saida = consultar_ceap.invoke({"query_sql": "SELECT SUM(valor) FROM despesas_ceap WHERE ano=2023"})
+    assert "Dados indisponíveis" in saida and "Não interprete como gasto zero" in saida
+
+
+def test_chat_online_nao_faz_download(monkeypatch, tmp_path):
+    from pathlib import Path
+
+    import pandas as pd
+
+    from src import config, downloads, llm
+    from src.data import anos_disponiveis
+
+    monkeypatch.setattr(config, "SQLITE_CEAP", tmp_path / "ceap.db")
+    monkeypatch.setattr(config, "DATA_DIR", tmp_path)
+    monkeypatch.setattr(llm, "offline", lambda: False)
+    chamadas = []
+
+    def baixar(ano):
+        chamadas.append(ano)
+        df = pd.read_csv(Path(__file__).parent / "dados/ceap_amostra.csv", sep=";", dtype=str)
+        df["numAno"] = str(ano)
+        destino = tmp_path / f"ceap_{ano}.csv"
+        df.to_csv(destino, sep=";", index=False)
+        return destino
+
+    monkeypatch.setattr(downloads, "baixar_csv", baixar)
+    saida = consultar_ceap.invoke(
+        {"query_sql": "SELECT SUM(valor) AS total FROM despesas_ceap WHERE ano=2024"}
+    )
+    assert "Dados indisponíveis" in saida and chamadas == []
+    consultar_ceap.invoke({"query_sql": "SELECT SUM(valor) FROM despesas_ceap WHERE ano=2024"})
+    assert chamadas == []
+    assert anos_disponiveis() == []
+
+
+def test_csv_incorreto_preserva_banco(tmp_path):
+    import sqlite3
+    from pathlib import Path
+
+    import pytest
+
+    from src.data import construir_sqlite
+
+    amostra = Path(__file__).parent / "dados/ceap_amostra.csv"
+    db = tmp_path / "ceap.db"
+    n = construir_sqlite(amostra, db)
+    with pytest.raises(ValueError, match="banco preservado"):
+        construir_sqlite(amostra, db, ano_esperado=2024)
+    with sqlite3.connect(db) as conn:
+        assert conn.execute("SELECT COUNT(*) FROM despesas_ceap").fetchone()[0] == n
